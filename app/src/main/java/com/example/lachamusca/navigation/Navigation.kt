@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.lachamusca.view.LoginScreen
 import com.example.lachamusca.view.MatchListScreen
+import com.example.lachamusca.view.MenuScreen
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
@@ -25,5 +26,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable("matchListScreen") {
             MatchListScreen(navController)  // Pantalla de lista de partidos
         }
+        composable("menu") {
+            MenuScreen()
+        }
+
     }
 }
