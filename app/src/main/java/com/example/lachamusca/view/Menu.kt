@@ -38,25 +38,17 @@ fun MenuScreen(navController: NavController) {
         ) {
             // Imagen de fondo o decorativa superior (Logo)
             Image(
-                painter = rememberImagePainter("https://via.placeholder.com/211x173"),
+                painter = rememberImagePainter("https://drive.google.com/uc?export=view&id=1xFfXfdH4sUk8c4Bp6ljRp7RxSN9b5kj7"),
                 contentDescription = "Imagen superior",
                 modifier = Modifier
                     .size(211.dp, 173.dp)
-                    .offset(x = (-52).dp, y = (-16).dp), // Reemplaza padding por offset
+                    .offset(x = (0).dp, y = (50).dp), // Reemplaza padding por offset
                 contentScale = ContentScale.FillBounds
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(-50.dp))
 
-            // Texto del menú (Ejemplo de encabezado)
-            Text(
-                text = "MENU",
-                style = TextStyle(
-                    color = Color.White,
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
+
 
             Spacer(modifier = Modifier.height(32.dp))
 

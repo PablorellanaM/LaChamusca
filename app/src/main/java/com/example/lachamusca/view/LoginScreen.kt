@@ -42,7 +42,7 @@ fun LoginScreen(navController: NavController) {
         ) {
             // Imagen decorativa en la parte superior
             Image(
-                painter = rememberImagePainter("https://via.placeholder.com/386x384"),
+                painter = rememberImagePainter("https://drive.google.com/uc?export=view&id=19k0Od8DGxXuoBRzyDgE6bqwf4jSlsSqN"),
                 contentDescription = "Logo superior",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -130,19 +130,19 @@ fun LoginScreen(navController: NavController) {
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                SocialIcon(imageUrl = "https://via.placeholder.com/38x38", onClick = {
+                SocialIcon(imageUrl = "https://drive.google.com/uc?export=view&id=1Sp-C9BH6Z3qjyWxjv9bmiEupHWUGQZIF", onClick = {
                     // Acción de inicio con Facebook
                     println("Inicio con Facebook")
                 })
-                SocialIcon(imageUrl = "https://via.placeholder.com/43x45", onClick = {
+                SocialIcon(imageUrl = "https://drive.google.com/uc?export=view&id=1DcFglvTwiKG_7DJ4qU9K9f1ebGs-2ShG", onClick = {
                     // Acción de inicio con Google
                     println("Inicio con Google")
                 })
-                SocialIcon(imageUrl = "https://via.placeholder.com/37x45", onClick = {
+                SocialIcon(imageUrl = "https://drive.google.com/uc?export=view&id=14b_qojH_QipLsK9LCEukZ12RO14uFivQ", onClick = {
                     // Acción de inicio con Apple
                     println("Inicio con Apple")
                 })
-                SocialIcon(imageUrl = "https://via.placeholder.com/37x88", onClick = {
+                SocialIcon(imageUrl = "https://drive.google.com/uc?export=view&id=1SWT8khOMLvzmsH18a27FHt5Voe17JZlq", onClick = {
                     // Acción de inicio con Microsoft
                     println("Inicio con Microsoft")
                 })

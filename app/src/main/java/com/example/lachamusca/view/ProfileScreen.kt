@@ -64,15 +64,7 @@ fun ProfileScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // Logo en la parte superior izquierda
-            Image(
-                painter = rememberImagePainter("https://via.placeholder.com/211x173"),
-                contentDescription = "Logo superior",
-                modifier = Modifier
-                    .size(211.dp, 173.dp)
-                    .padding(start = 0.dp, top = 0.dp),  // Se eliminan valores negativos
-                contentScale = ContentScale.FillBounds
-            )
+           
 
             Spacer(modifier = Modifier.height(16.dp))
 
