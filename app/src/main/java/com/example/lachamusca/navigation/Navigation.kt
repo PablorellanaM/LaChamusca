@@ -2,14 +2,13 @@ package com.example.lachamusca.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHost
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.lachamusca.view.LoginScreen
 import com.example.lachamusca.view.MatchListScreen
 import com.example.lachamusca.view.MenuScreen
+import com.example.lachamusca.view.ProfileScreen
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
@@ -27,8 +26,16 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             MatchListScreen(navController)  // Pantalla de lista de partidos
         }
         composable("menu") {
-            MenuScreen()
+            composable("menu") {
+                MenuScreen(navController = navController)
+        }
+        composable("profile") {
+            ProfileScreen()
         }
 
+
     }
+}
+
+
 }

@@ -68,6 +68,7 @@ dependencies {
 
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.0.0")
+    implementation(libs.androidx.foundation.android)
 
     // Testing dependencies
     testImplementation("junit:junit:4.13.2")
