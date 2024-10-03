@@ -1,8 +1,5 @@
 package com.example.lachamusca.view
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -26,13 +23,17 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.activity.compose.rememberLauncherForActivityResult
 import com.example.lachamusca.getSharedPrefs
 import com.example.lachamusca.saveUserName
 import com.example.lachamusca.getUserName
-import androidx.activity.compose.rememberLauncherForActivityResult
 
 @Composable
-fun ProfileScreen(navController: NavController, context: Context) {
+fun ProfileScreen(navController: NavController) {
+    // Acceso al contexto desde el Composable
+    val context = LocalContext.current
+
     // Recuperamos el nombre de usuario de SharedPreferences
     val prefs = context.getSharedPrefs()
     var userName by remember { mutableStateOf(prefs.getUserName() ?: "") }
@@ -59,7 +60,7 @@ fun ProfileScreen(navController: NavController, context: Context) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(16.dp),  // Ajuste de padding
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -69,7 +70,7 @@ fun ProfileScreen(navController: NavController, context: Context) {
                 contentDescription = "Logo superior",
                 modifier = Modifier
                     .size(211.dp, 173.dp)
-                    .padding(start = (-52).dp, top = (-16).dp),
+                    .padding(start = 0.dp, top = 0.dp),  // Se eliminan valores negativos
                 contentScale = ContentScale.FillBounds
             )
 

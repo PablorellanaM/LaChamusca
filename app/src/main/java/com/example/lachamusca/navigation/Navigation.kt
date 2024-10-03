@@ -6,7 +6,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.lachamusca.view.*
+import com.example.lachamusca.view.CrearPartidoScreen
+import com.example.lachamusca.view.EncontrarPartidoScreen
+import com.example.lachamusca.view.LoginScreen
+import com.example.lachamusca.view.MenuScreen
+import com.example.lachamusca.view.PartidosPopularesScreen
+import com.example.lachamusca.view.EquiposParaUnirteScreen
+import com.example.lachamusca.view.ProfileScreen
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
@@ -30,7 +36,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             PartidosPopularesScreen(navController)  // Pantalla de partidos populares
         }
         composable("teamsToJoin") {
-            EquiposUnirteScreen(navController)  // Pantalla de equipos a los que puedes unirte
+            EquiposParaUnirteScreen(navController)  // Pantalla de equipos a los que puedes unirte
         }
         composable("menu") {
             MenuScreen(navController = navController)  // Pantalla del menú
@@ -39,20 +45,4 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             ProfileScreen(navController = navController)  // Pantalla del perfil
         }
     }
-}
-
-fun ProfileScreen(navController: NavHostController) {
-    // Implementación de la pantalla de perfil
-}
-
-fun CrearPartidoScreen(navController: NavHostController) {
-    // Implementación de la pantalla para crear partidos
-}
-
-fun PartidosPopularesScreen(navController: NavHostController) {
-    // Implementación de la pantalla de partidos populares
-}
-
-fun EquiposUnirteScreen(navController: NavHostController) {
-    // Implementación de la pantalla para equipos a los que puedes unirte
 }
