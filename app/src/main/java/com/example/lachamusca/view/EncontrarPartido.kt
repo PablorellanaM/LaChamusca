@@ -66,15 +66,16 @@ fun EncontrarPartidoScreen(navController: NavController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp)
-                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(8.dp))
+                            .background(Color.White, shape = RoundedCornerShape(8.dp)) // Fondo blanco
+                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(8.dp)) // Borde gris
                             .padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
-                            Text(text = partido.nombre, fontWeight = FontWeight.W400)
+                            Text(text = partido.nombre, fontWeight = FontWeight.W400, color = Color.Black)
                             Text(text = partido.horario, style = TextStyle(color = Color.Gray, fontSize = 14.sp))
-                            Text(text = "${partido.participantes}/${partido.maxParticipantes}")
+                            Text(text = "${partido.participantes}/${partido.maxParticipantes}", color = Color.Black)
                         }
                         Button(
                             onClick = {

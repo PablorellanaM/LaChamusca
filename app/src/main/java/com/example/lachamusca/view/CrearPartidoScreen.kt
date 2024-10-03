@@ -48,38 +48,50 @@ fun CrearPartidoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Campo de texto con fondo blanco
             OutlinedTextField(
                 value = canchaName,
                 onValueChange = { canchaName = it },
                 label = { Text("NOMBRE DE LA CANCHA") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, shape = RoundedCornerShape(8.dp))
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Campo de texto con fondo blanco
             OutlinedTextField(
                 value = cantidadParticipantes,
                 onValueChange = { cantidadParticipantes = it },
                 label = { Text("CANTIDAD DE PARTICIPANTES") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, shape = RoundedCornerShape(8.dp))
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Campo de texto con fondo blanco
             OutlinedTextField(
                 value = horario,
                 onValueChange = { horario = it },
                 label = { Text("HORARIO") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, shape = RoundedCornerShape(8.dp))
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Campo de texto con fondo blanco
             OutlinedTextField(
                 value = ubicacion,
                 onValueChange = { ubicacion = it },
                 label = { Text("UBICACIÓN") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, shape = RoundedCornerShape(8.dp))
             )
 
             Spacer(modifier = Modifier.height(32.dp))
