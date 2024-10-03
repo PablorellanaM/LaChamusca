@@ -66,6 +66,7 @@ fun PartidosPopularesScreen(navController: NavController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp)
+                            .background(Color.White, shape = RoundedCornerShape(8.dp))  // Fondo blanco
                             .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(8.dp))
                             .padding(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
