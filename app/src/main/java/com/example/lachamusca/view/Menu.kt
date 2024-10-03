@@ -42,7 +42,7 @@ fun MenuScreen(navController: NavController) {
                 contentDescription = "Imagen superior",
                 modifier = Modifier
                     .size(211.dp, 173.dp)
-                    .padding(start = (-52).dp, top = (-16).dp),
+                    .offset(x = (-52).dp, y = (-16).dp), // Reemplaza padding por offset
                 contentScale = ContentScale.FillBounds
             )
 
@@ -128,3 +128,4 @@ fun MenuOption(text: String, onClick: () -> Unit) {
         )
     }
 }
+
