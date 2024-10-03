@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.lachamusca.view.CrearPartidoScreen
 import com.example.lachamusca.view.EncontrarPartidoScreen
 import com.example.lachamusca.view.LoginScreen
 import com.example.lachamusca.view.MatchListScreen
@@ -25,25 +26,25 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             LoginScreen(navController)  // Pantalla de login
         }
         composable("findMatch") {
-            EncontrarPartidoScreen(navController)
-        }  // Pantalla de lista de partidos
-
+            EncontrarPartidoScreen(navController)  // Pantalla para encontrar partidos
+        }
+        composable("createMatch") {
+            CrearPartidoScreen(navController)  // Pantalla para crear partidos
+        }
         composable("menu") {
-            MenuScreen(navController = navController)
+            MenuScreen(navController = navController)  // Pantalla del menú
         }
         composable(route = "profile") {
-            ProfileScreen(navController = navController)
+            ProfileScreen(navController = navController)  // Pantalla del perfil
         }
-
     }
-
-
-    }
-
-
-fun ProfileScreen(navController: NavHostController) {
-
 }
 
 
+fun ProfileScreen(navController: NavHostController) {
+    // Implementación de la pantalla de perfil
+}
 
+fun CrearPartidoScreen(navController: NavHostController) {
+    // Implementación de la pantalla para crear partidos
+}
