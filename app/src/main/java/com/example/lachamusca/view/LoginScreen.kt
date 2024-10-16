@@ -99,15 +99,19 @@ fun LoginScreen(navController: NavController) {
             // Botón "Iniciar Sesión"
             Button(
                 onClick = {
-                    // Iniciar sesión con Firebase
-                    auth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                navController.navigate("menu")  // Navegar al menú si el login es exitoso
-                            } else {
-                                loginError = "Error al iniciar sesión: ${task.exception?.message}"
+                    if (email.isNotEmpty() && password.isNotEmpty()) {
+                        // Iniciar sesión con Firebase
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    navController.navigate("menu")  // Navegar al menú si el login es exitoso
+                                } else {
+                                    loginError = "Error al iniciar sesión: ${task.exception?.message}"
+                                }
                             }
-                        }
+                    } else {
+                        loginError = "Por favor, rellene todos los campos."
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {

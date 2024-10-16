@@ -27,6 +27,8 @@ import com.google.firebase.auth.FirebaseAuth
 fun RegisterScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
     var registerError by remember { mutableStateOf<String?>(null) }
 
     val auth = FirebaseAuth.getInstance()
@@ -58,7 +60,29 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de texto para Nombre de Usuario (Correo Electrónico)
+            // Campo de texto para Nombres
+            TextField(
+                value = firstName,
+                onValueChange = { firstName = it },
+                label = { Text("Nombre") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Campo de texto para Apellidos
+            TextField(
+                value = lastName,
+                onValueChange = { lastName = it },
+                label = { Text("Apellido") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Campo de texto para Correo Electrónico
             TextField(
                 value = email,
                 onValueChange = { email = it },
@@ -90,14 +114,18 @@ fun RegisterScreen(navController: NavController) {
             // Botón "Crear Usuario"
             Button(
                 onClick = {
-                    auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                navController.navigate("menu")  // Navegar al menú si el registro es exitoso
-                            } else {
-                                registerError = "Error al crear usuario: ${task.exception?.message}"
+                    if (email.isNotEmpty() && password.isNotEmpty()) {
+                        auth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    navController.navigate("menu")  // Navegar al menú si el registro es exitoso
+                                } else {
+                                    registerError = "Error al crear usuario: ${task.exception?.message}"
+                                }
                             }
-                        }
+                    } else {
+                        registerError = "Por favor, rellene todos los campos."
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
