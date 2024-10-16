@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "530972329427",
+    "project_id": "lachamusca-9c7e0",
+    "storage_bucket": "lachamusca-9c7e0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:530972329427:android:0ecb3b0dd48b0c8ec6db26",
+        "android_client_info": {
+          "package_name": "com.example.lachamusca"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANbgnwzjJ77lBukncvJnCzPKzAb6fvGW8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
