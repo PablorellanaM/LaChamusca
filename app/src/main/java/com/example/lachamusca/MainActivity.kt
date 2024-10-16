@@ -13,11 +13,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import com.example.lachamusca.ui.theme.LaChamuscaTheme
 import com.example.lachamusca.navigation.AppNavigation
-
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 class MainActivity : ComponentActivity() {
+
+    // FirebaseAuth instance
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Inicializa Firebase Auth
+        auth = FirebaseAuth.getInstance()
 
         // Obtener el Window actual de la actividad
         val window = this.window
@@ -27,10 +35,14 @@ class MainActivity : ComponentActivity() {
             LaChamuscaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavigation(modifier = Modifier.padding(innerPadding))
-
                 }
             }
         }
+    }
+
+    // Función para obtener el usuario actual
+    private fun getCurrentUser(): FirebaseUser? {
+        return auth.currentUser
     }
 }
 
@@ -41,9 +53,11 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         modifier = modifier
     )
 }
+
 private fun enableEdgeToEdge(window: android.view.Window) {
     WindowCompat.setDecorFitsSystemWindows(window, false)
 }
+
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
