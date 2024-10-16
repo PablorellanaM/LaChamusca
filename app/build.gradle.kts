@@ -70,6 +70,9 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.0.0")
     implementation(libs.androidx.foundation.android)
 
+    // Firebase Authentication
+    implementation ("com.google.firebase:firebase-auth-ktx")
+
     // Testing dependencies
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.0")
