@@ -6,13 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.lachamusca.view.CrearPartidoScreen
-import com.example.lachamusca.view.EncontrarPartidoScreen
-import com.example.lachamusca.view.LoginScreen
-import com.example.lachamusca.view.MenuScreen
-import com.example.lachamusca.view.PartidosPopularesScreen
-import com.example.lachamusca.view.EquiposParaUnirteScreen
-import com.example.lachamusca.view.ProfileScreen
+import com.example.lachamusca.view.*
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
@@ -43,6 +37,10 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         }
         composable(route = "profile") {
             ProfileScreen(navController = navController)  // Pantalla del perfil
+        }
+        // Nueva pantalla de registro
+        composable("registerScreen") {
+            RegisterScreen(navController = navController)  // Pantalla para el registro de usuarios
         }
     }
 }
