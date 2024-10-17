@@ -2,6 +2,7 @@ package com.example.lachamusca.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,6 +12,7 @@ import com.example.lachamusca.view.*
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
+    val context = LocalContext.current  // Obtener el contexto actual
 
     NavHost(
         navController = navController,
@@ -20,8 +22,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable("loginScreen") {
             LoginScreen(navController)  // Pantalla de login
         }
-        composable("findMatch") {
-            EncontrarPartidoScreen(navController)  // Pantalla para encontrar partidos
+        composable(route = "findMatch") {
+            val context = LocalContext.current // Obtener el contexto actual
+            EncontrarPartidoScreen(navController, context)
         }
         composable("createMatch") {
             CrearPartidoScreen(navController)  // Pantalla para crear partidos
@@ -38,7 +41,6 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable(route = "profile") {
             ProfileScreen(navController = navController)  // Pantalla del perfil
         }
-        // Nueva pantalla de registro
         composable("registerScreen") {
             RegisterScreen(navController = navController)  // Pantalla para el registro de usuarios
         }

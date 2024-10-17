@@ -1,38 +1,32 @@
 package com.example.lachamusca.view
 
-import androidx.compose.foundation.BorderStroke
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 
 @Composable
 fun PartidosPopularesScreen(navController: NavController) {
-    // Lista de partidos populares con participantes y maxParticipantes
-    val partidosPopulares = remember {
-        mutableStateListOf(
-            Partido("Partido en Futeca Cayala", "De 4:00 p.m a 5:00 p.m", 9, 10),
-            Partido("Partido en Campo Marte", "De 2:00 p.m a 3:00 p.m", 5, 10),
-            Partido("Partido La Cantera Atlantico", "De 5:00 p.m a 6:00 p.m", 7, 10),
-            Partido("Partido en Campos del Roosevelt", "De 6:00 p.m a 7:00 p.m", 8, 10),
-            Partido("Partido en BRIO FUTBOL", "De 5:00 p.m a 6:00 p.m", 6, 10)
-        )
-    }
+    // Obtén el contexto local
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -44,6 +38,7 @@ fun PartidosPopularesScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            // Título de la pantalla
             Text(
                 text = "Partidos Populares",
                 style = TextStyle(color = Color.White, fontSize = 25.sp),
@@ -52,51 +47,44 @@ fun PartidosPopularesScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Partidos Disponibles",
-                style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Lista de partidos usando LazyColumn
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(partidosPopulares) { partido ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                            .background(Color.White, shape = RoundedCornerShape(8.dp))  // Fondo blanco
-                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(8.dp))
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column {
-                            Text(text = partido.nombre, fontWeight = FontWeight.W400)
-                            Text(text = partido.horario, style = TextStyle(color = Color.Gray, fontSize = 14.sp))
-                            Text(text = "${partido.participantes}/${partido.maxParticipantes}")
-                        }
-                        Button(
-                            onClick = { /* Acción al unirse */ },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009951)),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(text = "Unirse", color = Color.White)
-                        }
-                    }
-                }
+            // Botón para ver los partidos populares usando Google Places
+            Button(
+                onClick = { buscarCanchasPopulares(context) },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Text(text = "Ver Partidos Populares", color = Color.Black)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón de menú en la parte inferior
+            // Botón para volver al menú
             Button(
                 onClick = { navController.navigate("menu") },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                Text(text = "Menu")
+                Text(text = "Menú")
             }
         }
+    }
+}
+
+// Función para manejar la llamada a la API de Google Places en Partidos Populares
+fun buscarCanchasPopulares(context: Context) {
+    val placesClient = Places.createClient(context)
+    val placeFields = listOf(Place.Field.NAME, Place.Field.ADDRESS)
+    val request = FindCurrentPlaceRequest.newInstance(placeFields)
+
+    // Verificar permisos antes de hacer la solicitud
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        val placeResult = placesClient.findCurrentPlace(request)
+        placeResult.addOnSuccessListener { response ->
+            for (place in response.placeLikelihoods) {
+                Log.i("PlacesAPI", "Place found: ${place.place.name}, ${place.place.address}")
+            }
+        }.addOnFailureListener { exception ->
+            Log.e("PlacesAPI", "Error: ${exception.message}")
+        }
+    } else {
+        Log.e("PlacesAPI", "Permission denied")
     }
 }

@@ -84,6 +84,26 @@ dependencies {
     // Google Places API
     implementation("com.google.android.libraries.places:places:2.6.0")
 
+    // Google Maps SDK for Android
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+
+    // Google Maps Compose
+    implementation("com.google.maps.android:maps-compose:2.2.0")
+
+    // Google Play Services Location (para obtener la ubicación)
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // Excluir clases duplicadas de android.support y appcompat
+    configurations.all {
+        exclude(group = "android.support", module = "support-v4")
+    }
+
+    // Excluir clases duplicadas de appcompat-resources y appcompat
+    implementation("androidx.appcompat:appcompat:1.4.1") {
+        exclude(group = "androidx.appcompat", module = "appcompat-resources")
+    }
+    implementation("androidx.appcompat:appcompat-resources:1.4.1")
+
     // Testing dependencies
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.0")

@@ -21,10 +21,10 @@
         android:theme="@style/Theme.LaChamusca"
         tools:targetApi="31">
 
-        <!-- Clave de API de Google Places -->
+        <!-- Clave de API de Google Maps y Google Places -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBwQiSNqKIny4UH4Z0B1EyZ60hR1Jve9bg"/>
+            android:value="AIzaSyBwQiSNqKIny4UH4Z0B1EyZ60hR1Jve9bg"/> <!-- Tu API Key aquí -->
 
         <activity
             android:name=".MainActivity"
