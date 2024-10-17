@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import com.example.lachamusca.utils.NetworkUtils // Importamos la clase NetworkUtils
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -28,6 +29,12 @@ import com.google.maps.android.compose.MarkerState
 fun EncontrarPartidoScreen(navController: NavController, context: Context) {
     var userLocation by remember { mutableStateOf<LatLng?>(null) }
     var mostrarMapa by remember { mutableStateOf(false) }
+    var isConnected by remember { mutableStateOf(true) }
+
+    // Verificar la conexión a internet
+    LaunchedEffect(Unit) {
+        isConnected = NetworkUtils.isInternetAvailable(context)
+    }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -76,16 +83,20 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = {
-                solicitarPermisosYMostrarMapa()
-                Log.d("MapsDebug", "Botón 'Encontrar Canchas Cercanas' presionado")
+                if (isConnected) {
+                    solicitarPermisosYMostrarMapa()
+                    Log.d("MapsDebug", "Botón 'Encontrar Canchas Cercanas' presionado")
+                } else {
+                    Log.d("MapsDebug", "No hay conexión a internet")
+                }
             }) {
                 Text(text = "Encontrar Canchas Cercanas")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Mostrar el mapa si la ubicación es válida
-            if (mostrarMapa && userLocation != null) {
+            // Mostrar el mapa si la ubicación es válida y hay conexión
+            if (isConnected && mostrarMapa && userLocation != null) {
                 Log.d("MapsDebug", "Mostrando el mapa con ubicación: $userLocation")
                 GoogleMap(
                     modifier = Modifier
@@ -100,6 +111,9 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
                         )
                     }
                 }
+            } else if (!isConnected) {
+                // Mostrar mensaje si no hay conexión a internet
+                Text(text = "No hay conexión a internet. Mostrando datos locales.")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
