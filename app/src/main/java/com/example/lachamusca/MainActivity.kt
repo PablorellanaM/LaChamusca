@@ -15,6 +15,7 @@ import com.example.lachamusca.ui.theme.LaChamuscaTheme
 import com.example.lachamusca.navigation.AppNavigation
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.android.libraries.places.api.Places
 
 class MainActivity : ComponentActivity() {
 
@@ -26,6 +27,11 @@ class MainActivity : ComponentActivity() {
 
         // Inicializa Firebase Auth
         auth = FirebaseAuth.getInstance()
+
+        // Inicializa Google Places con la clave de API
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, "AIzaSyBwQiSNqKIny4UH4Z0B1EyZ60hR1Jve9bg")
+        }
 
         // Obtener el Window actual de la actividad
         val window = this.window
