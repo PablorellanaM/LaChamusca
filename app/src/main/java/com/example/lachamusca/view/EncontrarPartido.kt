@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import android.location.LocationRequest
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,6 +51,11 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
     }
 
     fun solicitarPermisosYMostrarMapa() {
+        if (!isConnected) {
+            Log.d("MapsDebug", "No hay conexión a internet")
+            return
+        }
+
         if (ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -113,7 +117,8 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
                 }
             } else if (!isConnected) {
                 // Mostrar mensaje si no hay conexión a internet
-                Text(text = "No hay conexión a internet. Mostrando datos locales.")
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Sin conexión a Internet", color = androidx.compose.ui.graphics.Color.Red)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
