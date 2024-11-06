@@ -1,6 +1,9 @@
 package com.example.lachamusca.view
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,11 +19,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import com.example.lachamusca.repository.Partido
 import com.example.lachamusca.repository.PartidoRepository
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
 @Composable
@@ -29,12 +34,31 @@ fun CrearPartidoScreen(navController: NavController, context: Context) {
     var cantidadParticipantes by remember { mutableStateOf(TextFieldValue("")) }
     var horario by remember { mutableStateOf(TextFieldValue("")) }
     var ubicacion by remember { mutableStateOf(TextFieldValue("")) }
+    var userLocation by remember { mutableStateOf<GeoPoint?>(null) } // Almacena la ubicación actual del usuario
 
     // Inicializa Firestore y PartidoRepository
     val db = FirebaseFirestore.getInstance()
     val partidoRepository = PartidoRepository(db)
 
     val coroutineScope = rememberCoroutineScope()
+
+    // Obtener la ubicación actual del usuario
+    LaunchedEffect(Unit) {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    userLocation = GeoPoint(location.latitude, location.longitude)
+                    ubicacion = TextFieldValue("Ubicación actual obtenida")
+                } else {
+                    Toast.makeText(context, "No se pudo obtener la ubicación actual", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            Toast.makeText(context, "Permiso de ubicación no concedido", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -100,17 +124,18 @@ fun CrearPartidoScreen(navController: NavController, context: Context) {
                 label = { Text("UBICACIÓN") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White, shape = RoundedCornerShape(8.dp))
+                    .background(Color.White, shape = RoundedCornerShape(8.dp)),
+                enabled = false
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
                 onClick = {
-                    if (canchaName.text.isNotEmpty() && cantidadParticipantes.text.isNotEmpty() && horario.text.isNotEmpty() && ubicacion.text.isNotEmpty()) {
+                    if (canchaName.text.isNotEmpty() && cantidadParticipantes.text.isNotEmpty() && horario.text.isNotEmpty() && userLocation != null) {
                         val partido = Partido(
                             nombre = canchaName.text,
-                            ubicacion = GeoPoint(14.6349, -90.5069), // Ejemplo de ubicación, cambiar a real si tienes el GPS
+                            ubicacion = userLocation!!,
                             descripcion = "Participantes: ${cantidadParticipantes.text}, Horario: ${horario.text}",
                             fecha = horario.text
                         )
