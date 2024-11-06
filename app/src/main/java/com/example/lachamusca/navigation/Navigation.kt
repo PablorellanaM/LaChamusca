@@ -27,7 +27,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             EncontrarPartidoScreen(navController, context)
         }
         composable("createMatch") {
-            CrearPartidoScreen(navController)  // Pantalla para crear partidos
+            CrearPartidoScreen(navController, context)  // Pantalla para crear partidos
         }
         composable("popularMatches") {
             PartidosPopularesScreen(navController)  // Pantalla de partidos populares
