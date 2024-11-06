@@ -80,6 +80,7 @@ dependencies {
 
     // Firebase Authentication
     implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
 
     // Google Places API
     implementation("com.google.android.libraries.places:places:2.6.0")
