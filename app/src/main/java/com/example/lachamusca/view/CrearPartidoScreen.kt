@@ -1,8 +1,7 @@
 package com.example.lachamusca.view
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -18,17 +17,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.firestore.FirebaseFirestore
-import java.text.SimpleDateFormat
-import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class) // Habilita el uso de la API experimental
 @Composable
-fun CrearPartidoScreen(navController: NavController, context: Context) {
+fun CrearPartidoScreen(navController: NavController) {
     var canchaName by remember { mutableStateOf(TextFieldValue("")) }
     var cantidadParticipantes by remember { mutableStateOf(TextFieldValue("")) }
-    var duracion by remember { mutableStateOf(60) } // Duración en minutos (1 hora)
-    var horarioSeleccionado by remember { mutableStateOf("") }
     var ubicacion by remember { mutableStateOf(TextFieldValue("")) }
 
+    var duracion by remember { mutableStateOf(1.0) } // 1 hora por defecto
+    var expandedDropdown by remember { mutableStateOf(false) }
+    var horarioSeleccionado by remember { mutableStateOf("") }
+
+    // Generar horarios según la duración seleccionada
     val horariosDisponibles = generarHorariosDisponibles(duracion)
 
     Box(
@@ -56,7 +57,6 @@ fun CrearPartidoScreen(navController: NavController, context: Context) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de texto para el nombre de la cancha
             OutlinedTextField(
                 value = canchaName,
                 onValueChange = { canchaName = it },
@@ -68,7 +68,17 @@ fun CrearPartidoScreen(navController: NavController, context: Context) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de texto para la ubicación
+            OutlinedTextField(
+                value = cantidadParticipantes,
+                onValueChange = { cantidadParticipantes = it },
+                label = { Text("CANTIDAD DE PARTICIPANTES") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, shape = RoundedCornerShape(8.dp))
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedTextField(
                 value = ubicacion,
                 onValueChange = { ubicacion = it },
@@ -80,49 +90,73 @@ fun CrearPartidoScreen(navController: NavController, context: Context) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Selección de duración
-            Text(text = "Duración del Partido", color = Color.White)
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
-                    onClick = { duracion = 60 },
-                    colors = ButtonDefaults.buttonColors(containerColor = if (duracion == 60) Color.Green else Color.Gray)
+                    onClick = { duracion = 1.0 },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (duracion == 1.0) Color(0xFF00C853) else Color.Gray
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("1 Hora")
+                    Text(text = "1 Hora")
                 }
+
                 Button(
-                    onClick = { duracion = 90 },
-                    colors = ButtonDefaults.buttonColors(containerColor = if (duracion == 90) Color.Green else Color.Gray)
+                    onClick = { duracion = 1.5 },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (duracion == 1.5) Color(0xFF00C853) else Color.Gray
+                    ),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("1.5 Horas")
+                    Text(text = "1.5 Horas")
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Selector de horario
-            Text(text = "Seleccione el Horario", color = Color.White)
-            DropdownMenu(
-                expanded = horariosDisponibles.isNotEmpty(),
-                onDismissRequest = { /* No necesitamos cerrarlo aquí */ }
+            ExposedDropdownMenuBox(
+                expanded = expandedDropdown,
+                onExpandedChange = { expandedDropdown = !expandedDropdown }
             ) {
-                horariosDisponibles.forEach { horario ->
-                    DropdownMenuItem(
-                        onClick = { horarioSeleccionado = horario },
-                        text = { Text(horario) }
-                    )
-
+                OutlinedTextField(
+                    value = horarioSeleccionado,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Horario") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDropdown) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White, shape = RoundedCornerShape(8.dp))
+                        .clickable { expandedDropdown = !expandedDropdown }
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedDropdown,
+                    onDismissRequest = { expandedDropdown = false }
+                ) {
+                    horariosDisponibles.forEach { horario ->
+                        DropdownMenuItem(
+                            onClick = {
+                                horarioSeleccionado = horario
+                                expandedDropdown = false
+                            },
+                            text = { Text(horario) }
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // Botón para crear el partido
             Button(
                 onClick = {
-                    guardarPartidoEnFirebase(canchaName.text, ubicacion.text, horarioSeleccionado, context)
+                    guardarPartidoEnFirebase(
+                        canchaName.text,
+                        ubicacion.text,
+                        horarioSeleccionado
+                    )
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009951)),
                 shape = RoundedCornerShape(8.dp),
@@ -133,7 +167,6 @@ fun CrearPartidoScreen(navController: NavController, context: Context) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón de menú en la parte inferior
             Button(
                 onClick = { navController.navigate("menu") },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -144,39 +177,33 @@ fun CrearPartidoScreen(navController: NavController, context: Context) {
     }
 }
 
+// Función para generar horarios disponibles según la duración seleccionada
+fun generarHorariosDisponibles(duracion: Double): List<String> {
+    val horarios = mutableListOf<String>()
+    val intervalo = (duracion * 60).toInt() // Convertir horas a minutos
+    var horaInicio = 8 * 60 // 8:00 AM en minutos
+
+    while (horaInicio + intervalo <= 22 * 60) { // Hasta las 10:00 PM
+        val horaInicioStr = String.format("%02d:%02d", horaInicio / 60, horaInicio % 60)
+        val horaFin = horaInicio + intervalo
+        val horaFinStr = String.format("%02d:%02d", horaFin / 60, horaFin % 60)
+        horarios.add("$horaInicioStr - $horaFinStr")
+        horaInicio += intervalo
+    }
+
+    return horarios
+}
+
 // Función para guardar el partido en Firebase
-fun guardarPartidoEnFirebase(canchaName: String, ubicacion: String, horario: String, context: Context) {
+fun guardarPartidoEnFirebase(canchaName: String, ubicacion: String, horario: String) {
     val db = FirebaseFirestore.getInstance()
     val partido = hashMapOf(
         "canchaName" to canchaName,
         "ubicacion" to ubicacion,
         "horario" to horario
     )
-
     db.collection("partidos")
         .add(partido)
-        .addOnSuccessListener {
-            Toast.makeText(context, "Partido creado exitosamente", Toast.LENGTH_SHORT).show()
-        }
-        .addOnFailureListener { e ->
-            Toast.makeText(context, "Error al crear el partido: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-}
-
-// Función para generar los horarios disponibles según la duración
-fun generarHorariosDisponibles(duracion: Int): List<String> {
-    val horarios = mutableListOf<String>()
-    val formato = SimpleDateFormat("HH:mm", Locale.getDefault())
-    val calendario = Calendar.getInstance()
-    calendario.set(Calendar.HOUR_OF_DAY, 8) // Horario de inicio: 8:00 AM
-    calendario.set(Calendar.MINUTE, 0)
-
-    while (calendario.get(Calendar.HOUR_OF_DAY) < 22) { // Horario de cierre: 10:00 PM
-        val horaInicio = formato.format(calendario.time)
-        calendario.add(Calendar.MINUTE, duracion)
-        val horaFin = formato.format(calendario.time)
-        horarios.add("$horaInicio - $horaFin")
-    }
-
-    return horarios
+        .addOnSuccessListener { /* éxito */ }
+        .addOnFailureListener { /* error */ }
 }
