@@ -1,5 +1,7 @@
 package com.example.lachamusca.view
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,17 +13,28 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.NavController
+import com.example.lachamusca.repository.Partido
+import com.example.lachamusca.repository.PartidoRepository
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
+import kotlinx.coroutines.launch
 
 @Composable
-fun CrearPartidoScreen(navController: NavController) {
+fun CrearPartidoScreen(navController: NavController, context: Context) {
     var canchaName by remember { mutableStateOf(TextFieldValue("")) }
     var cantidadParticipantes by remember { mutableStateOf(TextFieldValue("")) }
     var horario by remember { mutableStateOf(TextFieldValue("")) }
     var ubicacion by remember { mutableStateOf(TextFieldValue("")) }
+
+    // Inicializa Firestore y PartidoRepository
+    val db = FirebaseFirestore.getInstance()
+    val partidoRepository = PartidoRepository(db)
+
+    val coroutineScope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -48,7 +61,6 @@ fun CrearPartidoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de texto con fondo blanco
             OutlinedTextField(
                 value = canchaName,
                 onValueChange = { canchaName = it },
@@ -60,7 +72,6 @@ fun CrearPartidoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de texto con fondo blanco
             OutlinedTextField(
                 value = cantidadParticipantes,
                 onValueChange = { cantidadParticipantes = it },
@@ -72,7 +83,6 @@ fun CrearPartidoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de texto con fondo blanco
             OutlinedTextField(
                 value = horario,
                 onValueChange = { horario = it },
@@ -84,7 +94,6 @@ fun CrearPartidoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de texto con fondo blanco
             OutlinedTextField(
                 value = ubicacion,
                 onValueChange = { ubicacion = it },
@@ -98,7 +107,28 @@ fun CrearPartidoScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    // Lógica para crear el partido
+                    if (canchaName.text.isNotEmpty() && cantidadParticipantes.text.isNotEmpty() && horario.text.isNotEmpty() && ubicacion.text.isNotEmpty()) {
+                        val partido = Partido(
+                            nombre = canchaName.text,
+                            ubicacion = GeoPoint(14.6349, -90.5069), // Ejemplo de ubicación, cambiar a real si tienes el GPS
+                            descripcion = "Participantes: ${cantidadParticipantes.text}, Horario: ${horario.text}",
+                            fecha = horario.text
+                        )
+                        coroutineScope.launch {
+                            partidoRepository.agregarPartido(
+                                partido,
+                                onSuccess = {
+                                    Toast.makeText(context, "Partido creado exitosamente", Toast.LENGTH_SHORT).show()
+                                    navController.navigate("menu")
+                                },
+                                onFailure = { exception ->
+                                    Toast.makeText(context, "Error al crear el partido: ${exception.message}", Toast.LENGTH_LONG).show()
+                                }
+                            )
+                        }
+                    } else {
+                        Toast.makeText(context, "Completa todos los campos", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009951)),
                 shape = RoundedCornerShape(8.dp),
@@ -109,7 +139,6 @@ fun CrearPartidoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón de menú en la parte inferior
             Button(
                 onClick = { navController.navigate("menu") },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
