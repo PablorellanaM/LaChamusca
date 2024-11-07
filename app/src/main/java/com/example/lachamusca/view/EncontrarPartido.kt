@@ -14,9 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.lachamusca.R
@@ -29,18 +26,18 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.google.android.gms.maps.model.MapStyleOptions
+import androidx.compose.ui.unit.dp
+
 
 @Composable
 fun EncontrarPartidoScreen(navController: NavController, context: Context) {
+    val mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)
     var userLocation by remember { mutableStateOf<LatLng?>(null) }
     var mostrarMapa by remember { mutableStateOf(false) }
     var isConnected by remember { mutableStateOf(true) }
     var nearbyFields by remember { mutableStateOf<List<LatLng>>(emptyList()) }
 
-    // Verificar la conexión a internet
     LaunchedEffect(Unit) {
         isConnected = NetworkUtils.isInternetAvailable(context)
     }
@@ -115,7 +112,6 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Mostrar el mapa si la ubicación es válida y hay conexión
             if (isConnected && mostrarMapa && userLocation != null) {
                 Log.d("MapsDebug", "Mostrando el mapa con ubicación: $userLocation")
                 GoogleMap(
@@ -124,7 +120,8 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
                         .padding(16.dp),
                     properties = MapProperties(
                         isMyLocationEnabled = true,
-                        mapType = MapType.NORMAL
+                        mapType = MapType.NORMAL,
+                        mapStyleOptions = mapStyleOptions
                     )
                 ) {
                     userLocation?.let { location ->
@@ -135,7 +132,6 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
                         )
                     }
 
-                    // Añadir marcadores para las canchas cercanas con un color diferente
                     nearbyFields.forEach { cancha ->
                         Marker(
                             state = MarkerState(position = cancha),
@@ -145,7 +141,6 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
                     }
                 }
             } else if (!isConnected) {
-                // Mostrar mensaje si no hay conexión a internet
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = "Sin conexión a Internet", color = Color.Red)
             }
@@ -190,14 +185,12 @@ fun obtenerUbicacion(context: Context, onResult: (android.location.Location) -> 
     }
 }
 
-// Función para obtener canchas cercanas
 fun obtenerCanchasCercanas(
     context: Context,
     userLocation: LatLng?,
     onResult: (List<LatLng>) -> Unit
 ) {
     if (userLocation == null) return
-
 
     val simulatedCanchas = listOf(
         LatLng(userLocation.latitude + 0.01, userLocation.longitude + 0.01),
