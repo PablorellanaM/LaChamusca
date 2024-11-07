@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.lachamusca.R
@@ -21,14 +22,15 @@ import com.example.lachamusca.utils.NetworkUtils
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
-import com.google.android.gms.maps.model.MapStyleOptions
-import androidx.compose.ui.unit.dp
-
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
 
 @Composable
 fun EncontrarPartidoScreen(navController: NavController, context: Context) {
@@ -38,6 +40,7 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
     var isConnected by remember { mutableStateOf(true) }
     var nearbyFields by remember { mutableStateOf<List<LatLng>>(emptyList()) }
 
+    // Verificar la conexión a internet
     LaunchedEffect(Unit) {
         isConnected = NetworkUtils.isInternetAvailable(context)
     }
@@ -60,6 +63,7 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
         }
     }
 
+    // Función para solicitar permisos y mostrar el mapa
     fun solicitarPermisosYMostrarMapa() {
         if (!isConnected) {
             Log.d("MapsDebug", "No hay conexión a internet")
@@ -112,6 +116,7 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Mostrar el mapa si la ubicación es válida y hay conexión
             if (isConnected && mostrarMapa && userLocation != null) {
                 Log.d("MapsDebug", "Mostrando el mapa con ubicación: $userLocation")
                 GoogleMap(
@@ -132,6 +137,7 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
                         )
                     }
 
+                    // Agregar marcadores para las canchas cercanas
                     nearbyFields.forEach { cancha ->
                         Marker(
                             state = MarkerState(position = cancha),
@@ -185,6 +191,7 @@ fun obtenerUbicacion(context: Context, onResult: (android.location.Location) -> 
     }
 }
 
+// Función para obtener las canchas cercanas usando la API de Places Nearby Search
 fun obtenerCanchasCercanas(
     context: Context,
     userLocation: LatLng?,
@@ -192,9 +199,49 @@ fun obtenerCanchasCercanas(
 ) {
     if (userLocation == null) return
 
-    val simulatedCanchas = listOf(
-        LatLng(userLocation.latitude + 0.01, userLocation.longitude + 0.01),
-        LatLng(userLocation.latitude - 0.01, userLocation.longitude - 0.01)
-    )
-    onResult(simulatedCanchas)
+    val apiKey = "TU_API_KEY" // Reemplaza con tu API key de Google Places
+    val radius = 5000 // Radio en metros para la búsqueda
+    val type = "stadium" // Tipo de lugar (puedes usar "stadium" o "park" para canchas)
+
+    // URL para la llamada a la API de Places Nearby Search
+    val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json" +
+            "?location=${userLocation.latitude},${userLocation.longitude}" +
+            "&radius=$radius" +
+            "&type=$type" +
+            "&key=$apiKey"
+
+    // Cliente HTTP para realizar la solicitud
+    val client = OkHttpClient()
+    val request = Request.Builder().url(url).build()
+
+    // Llamada en un hilo secundario para evitar bloquear la interfaz
+    Thread {
+        try {
+            val response = client.newCall(request).execute()
+            if (response.isSuccessful) {
+                val responseData = response.body?.string()
+                if (responseData != null) {
+                    val jsonObject = JSONObject(responseData)
+                    val results = jsonObject.getJSONArray("results")
+                    val canchas = mutableListOf<LatLng>()
+
+                    // Recorrer los resultados y extraer las coordenadas
+                    for (i in 0 until results.length()) {
+                        val location = results.getJSONObject(i)
+                            .getJSONObject("geometry")
+                            .getJSONObject("location")
+                        val lat = location.getDouble("lat")
+                        val lng = location.getDouble("lng")
+                        canchas.add(LatLng(lat, lng))
+                    }
+
+                    // Llamar a onResult con la lista de coordenadas de canchas
+                    onResult(canchas)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("NearbySearch", "Error al obtener canchas cercanas: ${e.message}")
+        }
+    }.start()
 }
