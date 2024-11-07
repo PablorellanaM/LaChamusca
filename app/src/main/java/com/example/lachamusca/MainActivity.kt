@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
 
         // Inicializa Google Places con la clave de API
         if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, "AIzaSyBwQiSNqKIny4UH4Z0B1EyZ60hR1Jve9bg")
+            Places.initialize(applicationContext, "AIzaSyCXh7GAt6nmL0_TuPgIaESUeqnwduW9WGE")
         }
 
         // Obtener el Window actual de la actividad

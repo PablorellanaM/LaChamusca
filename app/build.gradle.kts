@@ -5,6 +5,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("C:\\Users\\Pablo\\.android\\debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
     namespace = "com.example.lachamusca"
     compileSdk = 34
 
@@ -32,12 +40,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11 // Cambiar a Java 11
+        sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "11" // Cambiar a Java 11
+        jvmTarget = "11"
     }
 
     buildFeatures {
@@ -111,6 +119,5 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.0")
     debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.4.0")
-    implementation ("androidx.compose.ui:ui-text:1.4.0")
-
+    implementation("androidx.compose.ui:ui-text:1.4.0")
 }

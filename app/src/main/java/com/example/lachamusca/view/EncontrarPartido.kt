@@ -21,6 +21,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 
@@ -106,7 +107,10 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp),
-                    properties = MapProperties(isMyLocationEnabled = true)
+                    properties = MapProperties(
+                        isMyLocationEnabled = true,
+                        mapType = MapType.NORMAL // Define el tipo de mapa aquí
+                    )
                 ) {
                     userLocation?.let { location ->
                         Marker(
