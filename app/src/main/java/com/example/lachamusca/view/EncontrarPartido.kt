@@ -199,7 +199,7 @@ fun obtenerCanchasCercanas(
 ) {
     if (userLocation == null) return
 
-    val apiKey = "TU_API_KEY" // Reemplaza con tu API key de Google Places
+    val apiKey = "AIzaSyCXh7GAt6nmL0_TuPgIaESUeqnwduW9WGE"
     val radius = 5000 // Radio en metros para la búsqueda
     val type = "stadium" // Tipo de lugar (puedes usar "stadium" o "park" para canchas)
 
