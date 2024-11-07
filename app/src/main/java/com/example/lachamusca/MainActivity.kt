@@ -16,6 +16,7 @@ import com.example.lachamusca.navigation.AppNavigation
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : ComponentActivity() {
@@ -24,21 +25,27 @@ class MainActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
+    // PlacesClient instance for Places API
+    private lateinit var placesClient: PlacesClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inicializa Firebase Auth
+        // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
 
-        // Inicializa Firestore
+        // Initialize Firestore
         db = FirebaseFirestore.getInstance()
 
-        // Inicializa Google Places con la clave de API
+        // Initialize Google Places with the API key
         if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, "AIzaSyCXh7GAt6nmL0_TuPgIaESUeqnwduW9WGE")
+            Places.initialize(applicationContext, "YOUR_API_KEY_HERE")
         }
 
-        // Obtener el Window actual de la actividad
+        // Initialize PlacesClient
+        placesClient = Places.createClient(this)
+
+        // Enable edge-to-edge mode
         val window = this.window
         enableEdgeToEdge(window)
 
@@ -51,9 +58,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Función para obtener el usuario actual
+    // Function to get the current user
     private fun getCurrentUser(): FirebaseUser? {
         return auth.currentUser
+    }
+
+    // Function to access the initialized PlacesClient
+    fun getPlacesClient(): PlacesClient {
+        return placesClient
     }
 }
 
