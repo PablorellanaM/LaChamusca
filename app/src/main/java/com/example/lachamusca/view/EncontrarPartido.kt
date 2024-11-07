@@ -201,7 +201,7 @@ fun obtenerCanchasCercanas(
 
     val apiKey = "AIzaSyCXh7GAt6nmL0_TuPgIaESUeqnwduW9WGE"
     val radius = 5000 // Radio en metros para la búsqueda
-    val type = "stadium" // Tipo de lugar (puedes usar "stadium" o "park" para canchas)
+    val type = "stadium" // Tipo de lugar
 
     // URL para la llamada a la API de Places Nearby Search
     val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json" +

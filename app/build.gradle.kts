@@ -121,5 +121,5 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.4.0")
     implementation("androidx.compose.ui:ui-text:1.4.0")
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+
 }
