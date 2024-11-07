@@ -26,8 +26,8 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             val context = LocalContext.current // Obtener el contexto actual
             EncontrarPartidoScreen(navController, context)
         }
-        composable("createMatch") {
-            CrearPartidoScreen(navController, context)  // Pantalla para crear partidos
+        composable(route = "createMatch") {
+            CrearPartidoScreen(navController = navController, context)
         }
         composable("popularMatches") {
             PartidosPopularesScreen(navController)  // Pantalla de partidos populares

@@ -14,6 +14,7 @@ foundationAndroid = "1.7.2"
 foundationAndroidVersion = "1.7.3"
 uiTextAndroid = "1.7.3"
 maps = "3.1.0-beta"
+androidxFoundationAndroid = "1.7.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,6 +37,7 @@ androidx-foundation-android = { group = "androidx.compose.foundation", name = "f
 foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroidVersion" }
 androidx-ui-text-android = { group = "androidx.compose.ui", name = "ui-text-android", version.ref = "uiTextAndroid" }
 maps = { group = "com.google.android.libraries.maps", name = "maps", version.ref = "maps" }
+androidx-compose-foundation-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "androidxFoundationAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

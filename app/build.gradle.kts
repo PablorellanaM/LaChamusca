@@ -104,10 +104,13 @@ dependencies {
         exclude(group = "androidx.appcompat", module = "appcompat-resources")
     }
     implementation("androidx.appcompat:appcompat-resources:1.4.1")
+    implementation(libs.androidx.compose.foundation.foundation.android)
 
     // Testing dependencies
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.0")
     debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.4.0")
+    implementation ("androidx.compose.ui:ui-text:1.4.0")
+
 }

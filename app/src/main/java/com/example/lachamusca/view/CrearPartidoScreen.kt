@@ -1,9 +1,13 @@
 package com.example.lachamusca.view
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,25 +16,28 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.NavController
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class) // Habilita el uso de la API experimental
 @Composable
-fun CrearPartidoScreen(navController: NavController) {
+fun CrearPartidoScreen(navController: NavController, context: Context) {
     var canchaName by remember { mutableStateOf(TextFieldValue("")) }
     var cantidadParticipantes by remember { mutableStateOf(TextFieldValue("")) }
     var ubicacion by remember { mutableStateOf(TextFieldValue("")) }
-
-    var duracion by remember { mutableStateOf(1.0) } // 1 hora por defecto
-    var expandedDropdown by remember { mutableStateOf(false) }
+    var duracion by remember { mutableStateOf(1.0) }
+    var horariosDisponibles by remember { mutableStateOf(listOf<String>()) }
     var horarioSeleccionado by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
 
-    // Generar horarios según la duración seleccionada
-    val horariosDisponibles = generarHorariosDisponibles(duracion)
+    // Actualizar la lista de horarios cuando la duración cambia
+    LaunchedEffect(duracion) {
+        horariosDisponibles = generarHorariosDisponibles(duracion)
+    }
 
     Box(
         modifier = Modifier
@@ -91,25 +98,19 @@ fun CrearPartidoScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(
                     onClick = { duracion = 1.0 },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (duracion == 1.0) Color(0xFF00C853) else Color.Gray
-                    ),
-                    shape = RoundedCornerShape(8.dp)
+                    colors = ButtonDefaults.buttonColors(containerColor = if (duracion == 1.0) Color(0xFF009951) else Color.Gray)
                 ) {
                     Text(text = "1 Hora")
                 }
 
                 Button(
                     onClick = { duracion = 1.5 },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (duracion == 1.5) Color(0xFF00C853) else Color.Gray
-                    ),
-                    shape = RoundedCornerShape(8.dp)
+                    colors = ButtonDefaults.buttonColors(containerColor = if (duracion == 1.5) Color(0xFF009951) else Color.Gray)
                 ) {
                     Text(text = "1.5 Horas")
                 }
@@ -117,34 +118,37 @@ fun CrearPartidoScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            ExposedDropdownMenuBox(
-                expanded = expandedDropdown,
-                onExpandedChange = { expandedDropdown = !expandedDropdown }
+            // Dropdown para seleccionar horario
+            OutlinedTextField(
+                value = horarioSeleccionado,
+                onValueChange = { },
+                readOnly = true,
+                label = { Text("Horario", color = Color.White) },
+                trailingIcon = {
+                    Icon(
+                        Icons.Default.ArrowDropDown,
+                        contentDescription = null,
+                        modifier = Modifier.clickable { expanded = true }
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF6200EE), shape = RoundedCornerShape(8.dp)) // Fondo morado
+                    .clickable { expanded = true }
+            )
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
             ) {
-                OutlinedTextField(
-                    value = horarioSeleccionado,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Horario") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDropdown) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.White, shape = RoundedCornerShape(8.dp))
-                        .clickable { expandedDropdown = !expandedDropdown }
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedDropdown,
-                    onDismissRequest = { expandedDropdown = false }
-                ) {
-                    horariosDisponibles.forEach { horario ->
-                        DropdownMenuItem(
-                            onClick = {
-                                horarioSeleccionado = horario
-                                expandedDropdown = false
-                            },
-                            text = { Text(horario) }
-                        )
-                    }
+                horariosDisponibles.forEach { horario ->
+                    DropdownMenuItem(
+                        text = { Text(horario) },
+                        onClick = {
+                            horarioSeleccionado = horario
+                            expanded = false
+                        }
+                    )
                 }
             }
 
@@ -155,7 +159,8 @@ fun CrearPartidoScreen(navController: NavController) {
                     guardarPartidoEnFirebase(
                         canchaName.text,
                         ubicacion.text,
-                        horarioSeleccionado
+                        horarioSeleccionado,
+                        context
                     )
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009951)),
@@ -177,33 +182,39 @@ fun CrearPartidoScreen(navController: NavController) {
     }
 }
 
-// Función para generar horarios disponibles según la duración seleccionada
+// Función para generar horarios disponibles
 fun generarHorariosDisponibles(duracion: Double): List<String> {
     val horarios = mutableListOf<String>()
-    val intervalo = (duracion * 60).toInt() // Convertir horas a minutos
-    var horaInicio = 8 * 60 // 8:00 AM en minutos
+    val formatoHora = SimpleDateFormat("HH:mm", Locale.getDefault())
+    val calendario = Calendar.getInstance()
 
-    while (horaInicio + intervalo <= 22 * 60) { // Hasta las 10:00 PM
-        val horaInicioStr = String.format("%02d:%02d", horaInicio / 60, horaInicio % 60)
-        val horaFin = horaInicio + intervalo
-        val horaFinStr = String.format("%02d:%02d", horaFin / 60, horaFin % 60)
-        horarios.add("$horaInicioStr - $horaFinStr")
-        horaInicio += intervalo
+    calendario.set(Calendar.HOUR_OF_DAY, 8)
+    calendario.set(Calendar.MINUTE, 0)
+
+    while (calendario.get(Calendar.HOUR_OF_DAY) < 22) {
+        val inicio = formatoHora.format(calendario.time)
+        calendario.add(Calendar.MINUTE, (duracion * 60).toInt())
+        val fin = formatoHora.format(calendario.time)
+        horarios.add("$inicio - $fin")
     }
-
     return horarios
 }
 
-// Función para guardar el partido en Firebase
-fun guardarPartidoEnFirebase(canchaName: String, ubicacion: String, horario: String) {
+// Función para guardar el partido en Firestore
+fun guardarPartidoEnFirebase(canchaName: String, ubicacion: String, horarioSeleccionado: String, context: Context) {
     val db = FirebaseFirestore.getInstance()
     val partido = hashMapOf(
         "canchaName" to canchaName,
         "ubicacion" to ubicacion,
-        "horario" to horario
+        "horario" to horarioSeleccionado
     )
+
     db.collection("partidos")
         .add(partido)
-        .addOnSuccessListener { /* éxito */ }
-        .addOnFailureListener { /* error */ }
+        .addOnSuccessListener {
+            Toast.makeText(context, "Partido creado exitosamente", Toast.LENGTH_SHORT).show()
+        }
+        .addOnFailureListener { e ->
+            Toast.makeText(context, "Error al crear el partido: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
 }
