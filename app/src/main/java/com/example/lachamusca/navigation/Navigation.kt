@@ -39,7 +39,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             MenuScreen(navController = navController)  // Pantalla del menú
         }
         composable(route = "profile") {
-            ProfileScreen(navController = navController)  // Pantalla del perfil
+            ProfileScreen(navController = navController, context)  // Pantalla del perfil
         }
         composable("registerScreen") {
             RegisterScreen(navController = navController)  // Pantalla para el registro de usuarios

@@ -114,6 +114,7 @@ dependencies {
     }
     implementation("androidx.appcompat:appcompat-resources:1.4.1")
     implementation(libs.androidx.compose.foundation.foundation.android)
+    implementation(libs.firebase.storage.ktx)
 
     // Testing dependencies
     testImplementation("junit:junit:4.13.2")
