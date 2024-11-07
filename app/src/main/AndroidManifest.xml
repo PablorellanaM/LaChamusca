@@ -26,8 +26,13 @@
         <!-- Clave de API de Google Maps y Google Places -->
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
+
             android:value="AIzaSyCXh7GAt6nmL0_TuPgIaESUeqnwduW9WGE"/>
 
+        <!-- Configuración de Places API -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCXh7GAt6nmL0_TuPgIaESUeqnwduW9WGE"/>
 
         <activity
             android:name=".MainActivity"
