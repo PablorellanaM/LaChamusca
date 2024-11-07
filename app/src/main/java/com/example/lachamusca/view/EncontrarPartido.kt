@@ -13,23 +13,32 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import com.example.lachamusca.utils.NetworkUtils // Importamos la clase NetworkUtils
+import com.example.lachamusca.R
+import com.example.lachamusca.utils.NetworkUtils
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun EncontrarPartidoScreen(navController: NavController, context: Context) {
     var userLocation by remember { mutableStateOf<LatLng?>(null) }
     var mostrarMapa by remember { mutableStateOf(false) }
     var isConnected by remember { mutableStateOf(true) }
+    var nearbyFields by remember { mutableStateOf<List<LatLng>>(emptyList()) }
 
     // Verificar la conexión a internet
     LaunchedEffect(Unit) {
@@ -45,6 +54,9 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
                 userLocation = LatLng(location.latitude, location.longitude)
                 mostrarMapa = true
                 Log.d("MapsDebug", "Ubicación obtenida: $userLocation")
+                obtenerCanchasCercanas(context, userLocation) { canchas ->
+                    nearbyFields = canchas
+                }
             }
         } else {
             Log.d("MapsDebug", "Permisos de ubicación denegados")
@@ -73,6 +85,9 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
                 userLocation = LatLng(location.latitude, location.longitude)
                 mostrarMapa = true
                 Log.d("MapsDebug", "Permisos ya otorgados. Ubicación: $userLocation")
+                obtenerCanchasCercanas(context, userLocation) { canchas ->
+                    nearbyFields = canchas
+                }
             }
         }
     }
@@ -109,20 +124,30 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
                         .padding(16.dp),
                     properties = MapProperties(
                         isMyLocationEnabled = true,
-                        mapType = MapType.NORMAL // Define el tipo de mapa aquí
+                        mapType = MapType.NORMAL
                     )
                 ) {
                     userLocation?.let { location ->
                         Marker(
                             state = MarkerState(position = location),
-                            title = "Tu ubicación"
+                            title = "Tu ubicación",
+                            snippet = "Aquí te encuentras"
+                        )
+                    }
+
+                    // Añadir marcadores para las canchas cercanas con un color diferente
+                    nearbyFields.forEach { cancha ->
+                        Marker(
+                            state = MarkerState(position = cancha),
+                            title = "Cancha de fútbol",
+                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)
                         )
                     }
                 }
             } else if (!isConnected) {
                 // Mostrar mensaje si no hay conexión a internet
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Sin conexión a Internet", color = androidx.compose.ui.graphics.Color.Red)
+                Text(text = "Sin conexión a Internet", color = Color.Red)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -145,7 +170,6 @@ fun obtenerUbicacion(context: Context, onResult: (android.location.Location) -> 
         } else {
             Log.d("MapsDebug", "Ubicación no encontrada, solicitando nueva ubicación")
 
-            // Solicitar una nueva ubicación en tiempo real si no hay una ubicación guardada
             val locationRequest = com.google.android.gms.location.LocationRequest.Builder(1000)
                 .setPriority(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY)
                 .build()
@@ -164,4 +188,20 @@ fun obtenerUbicacion(context: Context, onResult: (android.location.Location) -> 
     }.addOnFailureListener { exception ->
         Log.d("MapsDebug", "Error al obtener la ubicación: ${exception.message}")
     }
+}
+
+// Función para obtener canchas cercanas
+fun obtenerCanchasCercanas(
+    context: Context,
+    userLocation: LatLng?,
+    onResult: (List<LatLng>) -> Unit
+) {
+    if (userLocation == null) return
+
+
+    val simulatedCanchas = listOf(
+        LatLng(userLocation.latitude + 0.01, userLocation.longitude + 0.01),
+        LatLng(userLocation.latitude - 0.01, userLocation.longitude - 0.01)
+    )
+    onResult(simulatedCanchas)
 }
