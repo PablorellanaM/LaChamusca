@@ -8,9 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -20,25 +18,41 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-
-data class Equipo(
-    val nombre: String,
-    val rating: String
-)
+import com.example.lachamusca.repository.Partido
+import com.example.lachamusca.repository.PartidoRepository
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun EquiposParaUnirteScreen(navController: NavController) {
-    // Lista de equipos disponibles
-    val equipos = remember {
-        mutableStateListOf(
-            Equipo("Guatemala FC", "Rating Mínimo 4 Estrellas"),
-            Equipo("Garra Charrua FC", "Rating Mínimo 3 Estrellas"),
-            Equipo("Quetzaltecos FC", "Rating Mínimo 4 Estrellas"),
-            Equipo("Messilovers FC", "Rating Mínimo 2 Estrellas"),
-            Equipo("Bicholovers FC", "Rating Mínimo 4 Estrellas")
+    val db = FirebaseFirestore.getInstance()
+    val partidoRepository = PartidoRepository(db)
+
+    // Posición del jugador obtenida de SharedPreferences o algún repositorio
+    val posicionJugador = remember { mutableStateOf("") }
+
+    // Estado para manejar los equipos desde Firestore
+    val equiposFiltrados = remember { mutableStateListOf<Partido>() }
+    val cargando = remember { mutableStateOf(true) }
+    val error = remember { mutableStateOf<String?>(null) }
+
+    // Obtener la posición del jugador (reemplazar por tu lógica real para cargar la posición)
+    LaunchedEffect(Unit) {
+        posicionJugador.value = obtenerPosicionJugador() // Implementar esta función
+        partidoRepository.obtenerPartidosPorPosicion(
+            posicionJugador.value,
+            onSuccess = { partidos ->
+                equiposFiltrados.clear()
+                equiposFiltrados.addAll(partidos)
+                cargando.value = false
+            },
+            onFailure = { exception ->
+                error.value = exception.message
+                cargando.value = false
+            }
         )
     }
 
+    // Diseño de la pantalla
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -50,43 +64,66 @@ fun EquiposParaUnirteScreen(navController: NavController) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Equipos para Unirte",
+                text = "Equipos",
                 style = TextStyle(color = Color.White, fontSize = 25.sp),
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "EQUIPOS",
-                style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black)
-            )
+            // Botones de opciones principales
+            Button(
+                onClick = { navController.navigate("crearEquipo") }, // Navegar a CrearEquipoScreen
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            ) {
+                Text("Crear mi Equipo")
+            }
+            Button(
+                onClick = { /* No acción específica porque ya está en esta pantalla */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            ) {
+                Text("Unirte a un Equipo")
+            }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Lista de equipos usando LazyColumn
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(equipos) { equipo ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                            .background(Color.White, shape = RoundedCornerShape(8.dp)) // Fondo blanco
-                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(8.dp))
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column {
-                            Text(text = equipo.nombre, fontWeight = FontWeight.W400)
-                            Text(text = equipo.rating, style = TextStyle(color = Color.Gray, fontSize = 14.sp))
-                        }
-                        Button(
-                            onClick = { /* Acción al unirse */ },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009951)),
-                            shape = RoundedCornerShape(8.dp)
+            if (cargando.value) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            } else if (error.value != null) {
+                Text(
+                    text = "Error: ${error.value}",
+                    style = TextStyle(color = Color.Red),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(equiposFiltrados) { equipo ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .background(Color.White, shape = RoundedCornerShape(8.dp))
+                                .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(8.dp))
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(text = "Unirse", color = Color.White)
+                            Column {
+                                Text(text = equipo.nombre, fontWeight = FontWeight.W400)
+                                Text(
+                                    text = equipo.descripcion,
+                                    style = TextStyle(color = Color.Gray, fontSize = 14.sp)
+                                )
+                            }
+                            Button(
+                                onClick = { /* Acción al unirse */ },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009951)),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(text = "Unirse", color = Color.White)
+                            }
                         }
                     }
                 }
@@ -94,13 +131,19 @@ fun EquiposParaUnirteScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón de menú en la parte inferior
+            // Botón para regresar al menú
             Button(
                 onClick = { navController.navigate("menu") },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                Text(text = "Menu")
+                Text(text = "Menú")
             }
         }
     }
+}
+
+// Función ficticia para obtener la posición del jugador
+// Implementa esta función para usar SharedPreferences o algún repositorio
+fun obtenerPosicionJugador(): String {
+    return "Defensa" // Cambiar por la posición real guardada
 }

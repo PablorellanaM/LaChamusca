@@ -1,22 +1,22 @@
 package com.example.lachamusca.view
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 
 @Composable
 fun MenuScreen(navController: NavController) {
@@ -25,7 +25,7 @@ fun MenuScreen(navController: NavController) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFFA10202), Color(0xFF351111)) // Fondo con degradado
+                    colors = listOf(Color(0xFFA10202), Color(0xFF351111))
                 )
             )
     ) {
@@ -34,92 +34,90 @@ fun MenuScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.Top
         ) {
-            // Título del menú
-            Text(
-                text = "Menú Principal",
-                style = TextStyle(
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                ),
-                modifier = Modifier.padding(top = 16.dp)
+            // Imagen de fondo o decorativa superior (Logo)
+            Image(
+                painter = rememberImagePainter("https://drive.google.com/uc?export=view&id=1xFfXfdH4sUk8c4Bp6ljRp7RxSN9b5kj7"),
+                contentDescription = "Imagen superior",
+                modifier = Modifier
+                    .size(211.dp, 173.dp)
+                    .offset(x = (0).dp, y = (50).dp), // Reemplaza padding por offset
+                contentScale = ContentScale.FillBounds
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(-50.dp))
 
-            // Botones del menú organizados en dos filas
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                MenuButton(
-                    text = "Encontrar Partido",
-                    icon = Icons.Default.Search,
-                    onClick = { navController.navigate("findMatch") }
-                )
-                MenuButton(
-                    text = "Crear Partido",
-                    icon = Icons.Default.AddCircle,
-                    onClick = { navController.navigate("createMatch") }
-                )
-                MenuButton(
-                    text = "Partidos Populares",
-                    icon = Icons.Default.Star,
-                    onClick = { navController.navigate("popularMatches") }
-                )
-                MenuButton(
-                    text = "Equipos Disponibles",
-                    icon = Icons.Default.People, // Icono alternativo para equipos
-                    onClick = { navController.navigate("teamsToJoin") }
-                )
-            }
+
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Botones de las opciones de menú
+            MenuOption(text = "ENCONTRAR PARTIDO", onClick = { navController.navigate("findMatch") })
+            MenuOption(text = "CREAR PARTIDO", onClick = { navController.navigate("createMatch") })
+            MenuOption(text = "PARTIDOS POPULARES", onClick = { navController.navigate("popularMatches") })
+            MenuOption(text = "EQUIPOS ", onClick = { navController.navigate("teamsToJoin") })
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Botón de perfil en la parte inferior derecha
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp, end = 16.dp),
-                horizontalArrangement = Arrangement.End
+                    .padding(end = 16.dp, bottom = 16.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.Bottom
             ) {
-                MenuButton(
-                    text = "Perfil",
-                    icon = Icons.Default.Person,
-                    onClick = { navController.navigate("profile") }
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = rememberImagePainter("https://via.placeholder.com/75x110"),
+                        contentDescription = "Imagen de perfil",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clickable {
+                                // Navega a la pantalla de perfil
+                                navController.navigate("profile")
+                            },
+                        contentScale = ContentScale.Crop
+                    )
+
+                    // Texto "Perfil" debajo de la imagen
+                    Text(
+                        text = "Perfil",
+                        style = TextStyle(
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    )
+                }
             }
         }
     }
 }
 
-// Botón reutilizable con texto e ícono
 @Composable
-fun MenuButton(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
-    Row(
+fun MenuOption(text: String, onClick: () -> Unit) {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFD9D9D9)) // Fondo claro para el botón
+            .padding(8.dp)
+            .background(Color(0xFFD9D9D9))
             .clickable(onClick = onClick)
-            .padding(16.dp)
             .height(60.dp),
-        verticalAlignment = Alignment.CenterVertically
+        contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = Color.Black,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = text,
             style = TextStyle(
                 color = Color.Black,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
+                fontSize = 15.sp,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
+                fontWeight = FontWeight.W400
             )
         )
     }
 }
+

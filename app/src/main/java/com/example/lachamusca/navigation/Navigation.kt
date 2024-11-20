@@ -3,7 +3,6 @@ package com.example.lachamusca.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -34,6 +33,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         }
         composable("teamsToJoin") {
             EquiposParaUnirteScreen(navController)  // Pantalla de equipos a los que puedes unirte
+        }
+        composable("createTeam") {
+            CrearEquipoScreen(navController)  // Nueva pantalla para crear equipos
         }
         composable("menu") {
             MenuScreen(navController = navController)  // Pantalla del menú
