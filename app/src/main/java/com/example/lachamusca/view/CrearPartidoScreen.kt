@@ -216,5 +216,7 @@ fun guardarPartidoEnFirebase(canchaName: String, ubicacion: String, horarioSelec
         }
         .addOnFailureListener { e ->
             Toast.makeText(context, "Error al crear el partido: ${e.message}", Toast.LENGTH_SHORT).show()
+
+
         }
 }

@@ -23,11 +23,10 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapType
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -39,6 +38,9 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
     var mostrarMapa by remember { mutableStateOf(false) }
     var isConnected by remember { mutableStateOf(true) }
     var nearbyFields by remember { mutableStateOf<List<LatLng>>(emptyList()) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val scope = rememberCoroutineScope()
 
     // Verificar la conexión a internet
     LaunchedEffect(Unit) {
@@ -49,24 +51,22 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
-            Log.d("MapsDebug", "Permisos de ubicación concedidos")
             obtenerUbicacion(context) { location ->
                 userLocation = LatLng(location.latitude, location.longitude)
                 mostrarMapa = true
-                Log.d("MapsDebug", "Ubicación obtenida: $userLocation")
-                obtenerCanchasCercanas(context, userLocation) { canchas ->
+                scope.launch {
+                    val canchas = obtenerCanchasCercanas(context, userLocation)
                     nearbyFields = canchas
                 }
             }
         } else {
-            Log.d("MapsDebug", "Permisos de ubicación denegados")
+            errorMessage = "Permisos de ubicación denegados"
         }
     }
 
-    // Función para solicitar permisos y mostrar el mapa
     fun solicitarPermisosYMostrarMapa() {
         if (!isConnected) {
-            Log.d("MapsDebug", "No hay conexión a internet")
+            errorMessage = "Sin conexión a internet"
             return
         }
 
@@ -85,8 +85,8 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
             obtenerUbicacion(context) { location ->
                 userLocation = LatLng(location.latitude, location.longitude)
                 mostrarMapa = true
-                Log.d("MapsDebug", "Permisos ya otorgados. Ubicación: $userLocation")
-                obtenerCanchasCercanas(context, userLocation) { canchas ->
+                scope.launch {
+                    val canchas = obtenerCanchasCercanas(context, userLocation)
                     nearbyFields = canchas
                 }
             }
@@ -103,22 +103,15 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = {
-                if (isConnected) {
-                    solicitarPermisosYMostrarMapa()
-                    Log.d("MapsDebug", "Botón 'Encontrar Canchas Cercanas' presionado")
-                } else {
-                    Log.d("MapsDebug", "No hay conexión a internet")
-                }
-            }) {
+            Button(onClick = { solicitarPermisosYMostrarMapa() }) {
                 Text(text = "Encontrar Canchas Cercanas")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Mostrar el mapa si la ubicación es válida y hay conexión
-            if (isConnected && mostrarMapa && userLocation != null) {
-                Log.d("MapsDebug", "Mostrando el mapa con ubicación: $userLocation")
+            if (errorMessage != null) {
+                Text(text = errorMessage ?: "", color = Color.Red)
+            } else if (mostrarMapa && userLocation != null) {
                 GoogleMap(
                     modifier = Modifier
                         .fillMaxSize()
@@ -137,7 +130,6 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
                         )
                     }
 
-                    // Agregar marcadores para las canchas cercanas
                     nearbyFields.forEach { cancha ->
                         Marker(
                             state = MarkerState(position = cancha),
@@ -146,18 +138,13 @@ fun EncontrarPartidoScreen(navController: NavController, context: Context) {
                         )
                     }
                 }
-            } else if (!isConnected) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Sin conexión a Internet", color = Color.Red)
             }
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = {
-                navController.navigate("menu")
-            }) {
-                Text(text = "Menu")
-            }
+        Button(onClick = { navController.navigate("menu") }) {
+            Text(text = "Menú")
         }
     }
 }
@@ -168,80 +155,51 @@ fun obtenerUbicacion(context: Context, onResult: (android.location.Location) -> 
     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
         if (location != null) {
             onResult(location)
-        } else {
-            Log.d("MapsDebug", "Ubicación no encontrada, solicitando nueva ubicación")
-
-            val locationRequest = com.google.android.gms.location.LocationRequest.Builder(1000)
-                .setPriority(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY)
-                .build()
-
-            fusedLocationClient.requestLocationUpdates(locationRequest, object :
-                com.google.android.gms.location.LocationCallback() {
-                override fun onLocationResult(locationResult: com.google.android.gms.location.LocationResult) {
-                    val updatedLocation = locationResult.lastLocation
-                    if (updatedLocation != null) {
-                        onResult(updatedLocation)
-                        fusedLocationClient.removeLocationUpdates(this)
-                    }
-                }
-            }, null)
         }
     }.addOnFailureListener { exception ->
         Log.d("MapsDebug", "Error al obtener la ubicación: ${exception.message}")
     }
 }
 
-// Función para obtener las canchas cercanas usando la API de Places Nearby Search
-fun obtenerCanchasCercanas(
+// Función suspendida para obtener las canchas cercanas usando Google Places API
+suspend fun obtenerCanchasCercanas(
     context: Context,
-    userLocation: LatLng?,
-    onResult: (List<LatLng>) -> Unit
-) {
-    if (userLocation == null) return
+    userLocation: LatLng?
+): List<LatLng> {
+    if (userLocation == null) return emptyList()
 
-    val apiKey = "AIzaSyCXh7GAt6nmL0_TuPgIaESUeqnwduW9WGE"
-    val radius = 5000 // Radio en metros para la búsqueda
-    val type = "stadium" // Tipo de lugar
+    val apiKey = "TU_CLAVE_API_AQUI"
+    val radius = 5000
+    val type = "stadium"
 
-    // URL para la llamada a la API de Places Nearby Search
     val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json" +
             "?location=${userLocation.latitude},${userLocation.longitude}" +
-            "&radius=$radius" +
-            "&type=$type" +
-            "&key=$apiKey"
+            "&radius=$radius&type=$type&key=$apiKey"
 
-    // Cliente HTTP para realizar la solicitud
-    val client = OkHttpClient()
-    val request = Request.Builder().url(url).build()
-
-    // Llamada en un hilo secundario para evitar bloquear la interfaz
-    Thread {
+    return withContext(Dispatchers.IO) {
         try {
+            val client = OkHttpClient()
+            val request = Request.Builder().url(url).build()
             val response = client.newCall(request).execute()
-            if (response.isSuccessful) {
-                val responseData = response.body?.string()
-                if (responseData != null) {
-                    val jsonObject = JSONObject(responseData)
-                    val results = jsonObject.getJSONArray("results")
-                    val canchas = mutableListOf<LatLng>()
+            val responseData = response.body?.string() ?: return@withContext emptyList()
 
-                    // Recorrer los resultados y extraer las coordenadas
-                    for (i in 0 until results.length()) {
-                        val location = results.getJSONObject(i)
-                            .getJSONObject("geometry")
-                            .getJSONObject("location")
-                        val lat = location.getDouble("lat")
-                        val lng = location.getDouble("lng")
-                        canchas.add(LatLng(lat, lng))
-                    }
+            val jsonObject = JSONObject(responseData)
+            val results = jsonObject.getJSONArray("results")
+            val canchas = mutableListOf<LatLng>()
 
-                    // Llamar a onResult con la lista de coordenadas de canchas
-                    onResult(canchas)
-                }
+            for (i in 0 until results.length()) {
+                val location = results.getJSONObject(i)
+                    .getJSONObject("geometry")
+                    .getJSONObject("location")
+                val lat = location.getDouble("lat")
+                val lng = location.getDouble("lng")
+                canchas.add(LatLng(lat, lng))
             }
+
+            canchas
         } catch (e: Exception) {
-            e.printStackTrace()
             Log.e("NearbySearch", "Error al obtener canchas cercanas: ${e.message}")
+            emptyList()
         }
-    }.start()
+    }
 }

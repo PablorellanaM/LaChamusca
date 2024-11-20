@@ -5,9 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +27,8 @@ fun RegisterScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
+    var position by remember { mutableStateOf("") } // Nueva variable para posición
+    var expanded by remember { mutableStateOf(false) } // Estado del dropdown
     var registerError by remember { mutableStateOf<String?>(null) }
 
     val auth = FirebaseAuth.getInstance()
@@ -48,7 +48,6 @@ fun RegisterScreen(navController: NavController) {
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Texto "Introduzca la Siguiente Información"
             Text(
                 text = "Introduzca la Siguiente Información",
                 style = TextStyle(
@@ -60,7 +59,6 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de texto para Nombres
             TextField(
                 value = firstName,
                 onValueChange = { firstName = it },
@@ -71,7 +69,6 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de texto para Apellidos
             TextField(
                 value = lastName,
                 onValueChange = { lastName = it },
@@ -82,7 +79,6 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de texto para Correo Electrónico
             TextField(
                 value = email,
                 onValueChange = { email = it },
@@ -93,7 +89,6 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo de texto para Contraseña
             TextField(
                 value = password,
                 onValueChange = { password = it },
@@ -106,25 +101,62 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Mostrar error si hay problemas con el registro
+            // Dropdown para seleccionar la posición
+            Text(
+                text = "Seleccione su posición:",
+                style = TextStyle(
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.W400
+                )
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box {
+                OutlinedButton(
+                    onClick = { expanded = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = if (position.isEmpty()) "Seleccionar posición" else position)
+                }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    val positions = listOf("Portero", "Defensa", "Mediocampista", "Delantero")
+                    positions.forEach { pos ->
+                        DropdownMenuItem(onClick = {
+                            position = pos
+                            expanded = false
+                        }) {
+                            Text(text = pos)
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             registerError?.let {
                 Text(text = it, color = Color.Red)
             }
 
-            // Botón "Crear Usuario"
             Button(
                 onClick = {
-                    if (email.isNotEmpty() && password.isNotEmpty()) {
+                    if (email.isNotEmpty() && password.isNotEmpty() && position.isNotEmpty()) {
                         auth.createUserWithEmailAndPassword(email, password)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
-                                    navController.navigate("menu")  // Navegar al menú si el registro es exitoso
+                                    // Aquí puedes guardar la posición en Firestore o en tu base de datos
+                                    navController.navigate("menu")
                                 } else {
                                     registerError = "Error al crear usuario: ${task.exception?.message}"
                                 }
                             }
                     } else {
-                        registerError = "Por favor, rellene todos los campos."
+                        registerError = "Por favor, rellene todos los campos y seleccione una posición."
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -134,7 +166,6 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Texto "Regístrate con"
             Text(
                 text = "Regístrate con",
                 style = TextStyle(
@@ -146,25 +177,20 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Íconos de redes sociales
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 SocialIcon(imageUrl = "https://drive.google.com/uc?export=view&id=1Sp-C9BH6Z3qjyWxjv9bmiEupHWUGQZIF", onClick = {
-                    // Acción de registro con Facebook
                     println("Registro con Facebook")
                 })
                 SocialIcon(imageUrl = "https://drive.google.com/uc?export=view&id=1DcFglvTwiKG_7DJ4qU9K9f1ebGs-2ShG", onClick = {
-                    // Acción de registro con Google
                     println("Registro con Google")
                 })
                 SocialIcon(imageUrl = "https://drive.google.com/uc?export=view&id=14b_qojH_QipLsK9LCEukZ12RO14uFivQ", onClick = {
-                    // Acción de registro con Apple
                     println("Registro con Apple")
                 })
                 SocialIcon(imageUrl = "https://drive.google.com/uc?export=view&id=1SWT8khOMLvzmsH18a27FHt5Voe17JZlq", onClick = {
-                    // Acción de registro con Microsoft
                     println("Registro con Microsoft")
                 })
             }

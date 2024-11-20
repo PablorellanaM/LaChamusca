@@ -56,7 +56,7 @@ fun MenuScreen(navController: NavController) {
             MenuOption(text = "ENCONTRAR PARTIDO", onClick = { navController.navigate("findMatch") })
             MenuOption(text = "CREAR PARTIDO", onClick = { navController.navigate("createMatch") })
             MenuOption(text = "PARTIDOS POPULARES", onClick = { navController.navigate("popularMatches") })
-            MenuOption(text = "EQUIPOS A LOS QUE PUEDES UNIRTE", onClick = { navController.navigate("teamsToJoin") })
+            MenuOption(text = "EQUIPOS ", onClick = { navController.navigate("teamsToJoin") })
 
             Spacer(modifier = Modifier.height(32.dp))
 
