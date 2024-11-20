@@ -7,7 +7,7 @@ plugins {
 android {
     signingConfigs {
         getByName("debug") {
-            storeFile = file("C:\\Users\\Pablo\\.android\\debug.keystore")
+            storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
@@ -113,14 +113,19 @@ dependencies {
         exclude(group = "androidx.appcompat", module = "appcompat-resources")
     }
     implementation("androidx.appcompat:appcompat-resources:1.4.1")
-    implementation(libs.androidx.compose.foundation.foundation.android)
-    implementation(libs.firebase.storage.ktx)
+    implementation("androidx.compose.foundation:foundation:1.4.0")
 
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.androidx.ui.android)
     // Testing dependencies
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.0")
     debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.4.0")
     implementation("androidx.compose.ui:ui-text:1.4.0")
+
+    implementation("androidx.compose.material3:material3:1.2.0-alpha05")
+    implementation("androidx.compose.material:material-icons-extended:1.5.1")
 
 }
