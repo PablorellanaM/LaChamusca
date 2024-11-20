@@ -147,3 +147,4 @@ fun EquiposParaUnirteScreen(navController: NavController) {
 fun obtenerPosicionJugador(): String {
     return "Defensa" // Cambiar por la posición real guardada
 }
+

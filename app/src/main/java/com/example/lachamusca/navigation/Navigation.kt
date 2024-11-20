@@ -46,5 +46,10 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         composable("registerScreen") {
             RegisterScreen(navController = navController)  // Pantalla para el registro de usuarios
         }
+
+        composable(route = "crearEquipo") {
+            CrearEquipoScreen(navController = navController)
+        }
+
     }
 }

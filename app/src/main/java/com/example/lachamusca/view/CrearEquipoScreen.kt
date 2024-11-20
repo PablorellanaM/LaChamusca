@@ -1,105 +1,116 @@
 package com.example.lachamusca.view
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.lachamusca.repository.Partido
-import com.example.lachamusca.repository.PartidoRepository
-import com.google.firebase.firestore.FirebaseFirestore
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CrearEquipoScreen(navController: NavHostController) {
     var nombreEquipo by remember { mutableStateOf("") }
-    var posicionesJugadores by remember { mutableStateOf(listOf<String>()) }
-    var posicionDisponible by remember { mutableStateOf("") }
-    var mensajeExito by remember { mutableStateOf<String?>(null) }
-    var mensajeError by remember { mutableStateOf<String?>(null) }
-    val partidoRepository = remember { PartidoRepository(FirebaseFirestore.getInstance()) } // Inicializa el repositorio
+    var posicionNecesaria by remember { mutableStateOf("") }
+    val opcionesPosiciones = listOf("Arquero", "Defensa", "Mediocampista", "Delantero", "Todas")
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        // Campo para el nombre del equipo
-        TextField(
-            value = nombreEquipo,
-            onValueChange = { nombreEquipo = it },
-            label = { Text("Nombre del equipo") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Color(0xFFA10202), Color(0xFF351111))
+                )
+            )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Título
+            Text(
+                text = "Crear Equipo",
+                fontSize = 24.sp,
+                color = Color.White
+            )
 
-        // Lista de posiciones de los jugadores
-        Text("Posiciones de jugadores:")
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(posicionesJugadores) { posicion ->
-                Text(text = posicion, modifier = Modifier.padding(4.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Campo para el nombre del equipo
+            TextField(
+                value = nombreEquipo,
+                onValueChange = { nombreEquipo = it },
+                label = { Text("Nombre del Equipo") },
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.White,
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Selección de posición necesaria
+            Text(
+                text = "Selecciona una posición necesaria:",
+                color = Color.White
+            )
+
+            opcionesPosiciones.forEach { opcion ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { posicionNecesaria = opcion }
+                        .padding(vertical = 8.dp)
+                ) {
+                    RadioButton(
+                        selected = posicionNecesaria == opcion,
+                        onClick = { posicionNecesaria = opcion },
+                        colors = RadioButtonDefaults.colors(selectedColor = Color.White)
+                    )
+                    Text(text = opcion, color = Color.White)
+                }
             }
-        }
-        OutlinedButton(
-            onClick = {
-                if (posicionDisponible.isNotEmpty()) {
-                    posicionesJugadores = posicionesJugadores + posicionDisponible
-                    posicionDisponible = "" // Limpia el campo después de agregar
-                }
-            },
-            modifier = Modifier.padding(top = 8.dp)
-        ) {
-            Text("Agregar Posición")
-        }
-        Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo para posición disponible
-        TextField(
-            value = posicionDisponible,
-            onValueChange = { posicionDisponible = it },
-            label = { Text("Posición disponible") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón para crear equipo
-        Button(
-            onClick = {
-                if (nombreEquipo.isNotEmpty() && posicionesJugadores.isNotEmpty()) {
-                    // Crea el objeto Partido y guárdalo
-                    val nuevoEquipo = Partido(
-                        nombre = nombreEquipo,
-                        posicionesNecesarias = posicionesJugadores
-                    )
-                    partidoRepository.agregarPartido(
-                        partido = nuevoEquipo,
-                        onSuccess = {
-                            mensajeExito = "Equipo creado exitosamente."
-                            mensajeError = null
-                            navController.navigate("menu") // Navega al menú si tiene éxito
-                        },
-                        onFailure = { exception ->
-                            mensajeExito = null
-                            mensajeError = "Error al crear equipo: ${exception.message}"
-                        }
-                    )
-                } else {
-                    mensajeError = "Por favor, completa todos los campos."
-                }
-            },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
-            Text("Crear Equipo")
-        }
+            // Botón para guardar equipo
+            Button(
+                onClick = {
+                    // Aquí guardarás los datos en Firestore
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA))
+            ) {
+                Icon(imageVector = Icons.Default.Group, contentDescription = null, tint = Color.White)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Guardar Equipo", color = Color.White)
+            }
 
-        // Mensaje de éxito
-        mensajeExito?.let { mensaje ->
-            Text(text = mensaje, color = Color.Green, modifier = Modifier.padding(top = 16.dp))
-        }
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Mensaje de error
-        mensajeError?.let { mensaje ->
-            Text(text = mensaje, color = Color.Red, modifier = Modifier.padding(top = 16.dp))
+            // Botón para regresar al menú
+            Button(
+                onClick = { navController.navigate("menu") },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA))
+            ) {
+                Icon(imageVector = Icons.Default.PersonAdd, contentDescription = null, tint = Color.White)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Volver al Menú", color = Color.White)
+            }
         }
     }
 }
