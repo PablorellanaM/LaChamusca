@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun RegisterScreen(navController: NavController) {
@@ -27,11 +28,12 @@ fun RegisterScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
-    var position by remember { mutableStateOf("") } // Nueva variable para posición
-    var expanded by remember { mutableStateOf(false) } // Estado del dropdown
+    var position by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
     var registerError by remember { mutableStateOf<String?>(null) }
 
     val auth = FirebaseAuth.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
 
     Box(
         modifier = Modifier
@@ -149,8 +151,23 @@ fun RegisterScreen(navController: NavController) {
                         auth.createUserWithEmailAndPassword(email, password)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
-                                    // Aquí puedes guardar la posición en Firestore o en tu base de datos
-                                    navController.navigate("menu")
+                                    val userId = task.result?.user?.uid
+                                    if (userId != null) {
+                                        val userMap = mapOf(
+                                            "firstName" to firstName,
+                                            "lastName" to lastName,
+                                            "email" to email,
+                                            "position" to position
+                                        )
+                                        firestore.collection("users").document(userId)
+                                            .set(userMap)
+                                            .addOnSuccessListener {
+                                                navController.navigate("menu")
+                                            }
+                                            .addOnFailureListener { exception ->
+                                                registerError = "Error al guardar usuario: ${exception.message}"
+                                            }
+                                    }
                                 } else {
                                     registerError = "Error al crear usuario: ${task.exception?.message}"
                                 }

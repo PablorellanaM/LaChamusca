@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.lachamusca.repository.Equipo
 import com.example.lachamusca.repository.EquipoRepository
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import androidx.compose.foundation.clickable
 
 @Composable
 fun UnirteEquipoScreen(navController: NavHostController) {
@@ -24,14 +24,22 @@ fun UnirteEquipoScreen(navController: NavHostController) {
     val equipos = remember { mutableStateListOf<Equipo>() }
     val cargando = remember { mutableStateOf(true) }
     val error = remember { mutableStateOf<String?>(null) }
-    var equipoSeleccionado by remember { mutableStateOf<Equipo?>(null) }
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val userId = currentUser?.uid
 
     // Cargar equipos desde Firebase
     LaunchedEffect(Unit) {
         equipoRepository.obtenerTodosLosEquipos(
             onSuccess = { listaEquipos ->
                 equipos.clear()
-                equipos.addAll(listaEquipos)
+                // Filtrar equipos a los que el usuario no pertenece y estén bajo el límite
+                equipos.addAll(
+                    listaEquipos.filter { equipo ->
+                        userId != null &&
+                                !equipo.miembros.contains(userId) &&
+                                equipo.miembros.size < 10
+                    }
+                )
                 cargando.value = false
             },
             onFailure = { exception ->
@@ -57,7 +65,7 @@ fun UnirteEquipoScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Unirte a un Equipo",
+                text = "Equipos Disponibles",
                 fontSize = 24.sp,
                 color = Color.White
             )
@@ -82,10 +90,7 @@ fun UnirteEquipoScreen(navController: NavHostController) {
                             colors = CardDefaults.cardColors(containerColor = Color.White)
                         ) {
                             Column(
-                                modifier = Modifier
-                                    .padding(16.dp)
-                                    .fillMaxWidth()
-                                    .clickable { equipoSeleccionado = equipo }
+                                modifier = Modifier.padding(16.dp)
                             ) {
                                 Text(
                                     text = "Nombre: ${equipo.nombre}",
@@ -93,33 +98,39 @@ fun UnirteEquipoScreen(navController: NavHostController) {
                                     color = Color.Black
                                 )
                                 Text(
-                                    text = "Descripción: ${equipo.descripcion}",
+                                    text = "Posición Solicitada: ${equipo.posicionSolicitada}",
                                     fontSize = 16.sp,
                                     color = Color.Gray
                                 )
                                 Text(
-                                    text = "Ubicación: ${equipo.ubicacion}",
+                                    text = "Miembros: ${equipo.miembros.size} / 10",
                                     fontSize = 16.sp,
                                     color = Color.Gray
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Button(
+                                    onClick = {
+                                        equipoRepository.unirseAEquipo(
+                                            equipoId = equipo.id,
+                                            usuarioId = userId ?: "",
+                                            onSuccess = {
+                                                // Actualizar la lista local
+                                                equipos.remove(equipo)
+                                            },
+                                            onFailure = { exception ->
+                                                error.value =
+                                                    "Error al unirse al equipo: ${exception.message}"
+                                            }
+                                        )
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA))
+                                ) {
+                                    Text("Unirse", color = Color.White)
+                                }
                             }
                         }
                     }
                 }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    if (equipoSeleccionado != null) {
-                        // Aquí puedes manejar la lógica para unirse al equipo seleccionado
-                        navController.navigate("menu")
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA))
-            ) {
-                Text("Unirse", color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(16.dp))

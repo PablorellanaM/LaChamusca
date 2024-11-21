@@ -1,5 +1,6 @@
 package com.example.lachamusca.navigation
 
+import CrearEquipoScreen
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -54,7 +55,9 @@ fun Navigation(modifier: Modifier = Modifier) {
         composable(route = "crearEquipo") {
             CrearEquipoScreen(navController = navController) // Pantalla para crear equipos
         }
-
+        composable("unirteEquipo") {
+            UnirteEquipoScreen(navController = navController)
+        }
     }
 }
 
