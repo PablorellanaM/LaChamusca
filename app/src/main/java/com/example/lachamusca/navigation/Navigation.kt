@@ -1,5 +1,6 @@
 package com.example.lachamusca.navigation
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -9,7 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.lachamusca.view.*
 
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier) {
+fun Navigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val context = LocalContext.current  // Obtener el contexto actual
 
@@ -22,20 +23,19 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             LoginScreen(navController)  // Pantalla de login
         }
         composable(route = "findMatch") {
-            val context = LocalContext.current // Obtener el contexto actual
-            EncontrarPartidoScreen(navController, context)
+            EncontrarPartidoScreen(navController, context)  // Pantalla de encontrar partido
         }
         composable(route = "createMatch") {
-            CrearPartidoScreen(navController = navController, context)
+            CrearPartidoScreen(navController = navController, context)  // Pantalla de crear partido
         }
         composable("popularMatches") {
             PartidosPopularesScreen(navController)  // Pantalla de partidos populares
         }
         composable("teamsToJoin") {
-            EquiposParaUnirteScreen(navController)  // Pantalla de equipos a los que puedes unirte
+            UnirteEquipoScreen(navController)  // Pantalla de equipos a los que puedes unirte
         }
         composable("createTeam") {
-            CrearEquipoScreen(navController)  // Nueva pantalla para crear equipos
+            CrearEquipoScreen(navController)  // Pantalla para crear equipos
         }
         composable("menu") {
             MenuScreen(navController = navController)  // Pantalla del menú
@@ -47,9 +47,14 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             RegisterScreen(navController = navController)  // Pantalla para el registro de usuarios
         }
 
+        composable("equipos") {
+            EquiposScreen(navController) // Pantalla para las opciones de equipos
+        }
+
         composable(route = "crearEquipo") {
-            CrearEquipoScreen(navController = navController)
+            CrearEquipoScreen(navController = navController) // Pantalla para crear equipos
         }
 
     }
 }
+

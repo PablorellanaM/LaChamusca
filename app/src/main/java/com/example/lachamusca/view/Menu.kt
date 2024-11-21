@@ -4,7 +4,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,27 +42,39 @@ fun MenuScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            // Imagen de fondo o decorativa superior (Logo)
+            // Imagen decorativa superior (Logo)
             Image(
                 painter = rememberImagePainter("https://drive.google.com/uc?export=view&id=1xFfXfdH4sUk8c4Bp6ljRp7RxSN9b5kj7"),
                 contentDescription = "Imagen superior",
                 modifier = Modifier
                     .size(211.dp, 173.dp)
-                    .offset(x = (0).dp, y = (50).dp), // Reemplaza padding por offset
+                    .padding(top = 16.dp),
                 contentScale = ContentScale.FillBounds
             )
 
-            Spacer(modifier = Modifier.height(-50.dp))
-
-
-
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Botones de las opciones de menú
-            MenuOption(text = "ENCONTRAR PARTIDO", onClick = { navController.navigate("findMatch") })
-            MenuOption(text = "CREAR PARTIDO", onClick = { navController.navigate("createMatch") })
-            MenuOption(text = "PARTIDOS POPULARES", onClick = { navController.navigate("popularMatches") })
-            MenuOption(text = "EQUIPOS ", onClick = { navController.navigate("teamsToJoin") })
+            // Botones del menú
+            MenuOption(
+                text = "ENCONTRAR PARTIDO",
+                icon = Icons.Default.SportsSoccer,
+                onClick = { navController.navigate("findMatch") }
+            )
+            MenuOption(
+                text = "CREAR PARTIDO",
+                icon = Icons.Default.Add,
+                onClick = { navController.navigate("createMatch") }
+            )
+            MenuOption(
+                text = "PARTIDOS POPULARES",
+                icon = Icons.Default.Star,
+                onClick = { navController.navigate("popularMatches") }
+            )
+            MenuOption(
+                text = "EQUIPOS",
+                onClick = { navController.navigate("equipos") },
+                icon = Icons.Default.Groups // Usa el ícono apropiado para "Equipos"
+            )
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -99,25 +117,30 @@ fun MenuScreen(navController: NavController) {
 }
 
 @Composable
-fun MenuOption(text: String, onClick: () -> Unit) {
-    Box(
+fun MenuOption(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .background(Color(0xFFD9D9D9))
-            .clickable(onClick = onClick)
-            .height(60.dp),
-        contentAlignment = Alignment.Center
+            .padding(vertical = 8.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
     ) {
-        Text(
-            text = text,
-            style = TextStyle(
-                color = Color.Black,
-                fontSize = 15.sp,
-                fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-                fontWeight = FontWeight.W400
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.Black,
+                modifier = Modifier.size(24.dp)
             )
-        )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = text,
+                style = TextStyle(
+                    color = Color.Black,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        }
     }
 }
-
