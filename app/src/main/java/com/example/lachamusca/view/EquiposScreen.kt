@@ -1,23 +1,19 @@
 package com.example.lachamusca.view
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EquiposScreen(navController: NavController) {
+fun EquiposScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -32,53 +28,53 @@ fun EquiposScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.SpaceAround
         ) {
-            // Título de la pantalla
+            // Título
             Text(
                 text = "Equipos",
-                style = TextStyle(
-                    color = Color.White,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                modifier = Modifier.padding(bottom = 32.dp)
+                fontSize = 24.sp,
+                color = Color.White
             )
 
-            // Botón para ir a "Crear Equipo"
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Botón para crear equipo
             Button(
-                onClick = { navController.navigate("crearEquipo") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                onClick = { navController.navigate("createTeam") },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA)),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = "Crear Equipo",
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
+                Text("Crear Equipo", color = Color.White)
             }
 
-            // Botón para ir a "Unirte a un Equipo"
+            // Botón para unirte a un equipo
             Button(
-                onClick = { navController.navigate("unirteEquipo") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                onClick = { navController.navigate("teamsToJoin") },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA)),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = "Unirte a un Equipo",
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
+                Text("Unirte a un Equipo", color = Color.White)
+            }
+
+            // Botón para ver el equipo al que pertenece el usuario
+            Button(
+                onClick = { navController.navigate("myTeam") },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ver mi Equipo", color = Color.White)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Botón para regresar al menú
+            Button(
+                onClick = { navController.navigate("menu") },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Volver al Menú", color = Color.White)
             }
         }
     }

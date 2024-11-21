@@ -58,6 +58,10 @@ fun Navigation(modifier: Modifier = Modifier) {
         composable("unirteEquipo") {
             UnirteEquipoScreen(navController = navController)
         }
+
+        composable("myTeam") {
+            VerMiEquipoScreen(navController)
+        }
     }
 }
 
