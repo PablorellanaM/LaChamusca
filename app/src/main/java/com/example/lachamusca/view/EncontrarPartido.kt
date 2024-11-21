@@ -1,205 +1,175 @@
 package com.example.lachamusca.view
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Context
-import android.content.pm.PackageManager
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.navigation.NavController
-import com.example.lachamusca.R
-import com.example.lachamusca.utils.NetworkUtils
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.maps.android.compose.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.json.JSONObject
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun EncontrarPartidoScreen(navController: NavController, context: Context) {
-    val mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)
-    var userLocation by remember { mutableStateOf<LatLng?>(null) }
-    var mostrarMapa by remember { mutableStateOf(false) }
-    var isConnected by remember { mutableStateOf(true) }
-    var nearbyFields by remember { mutableStateOf<List<LatLng>>(emptyList()) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+fun EncontrarPartidoScreen(navController: NavHostController) {
+    val db = FirebaseFirestore.getInstance()
+    val partidos = remember { mutableStateListOf<Map<String, Any>>() }
+    val cargando = remember { mutableStateOf(true) }
+    val error = remember { mutableStateOf<String?>(null) }
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val userId = currentUser?.uid
 
-    val scope = rememberCoroutineScope()
-
-    // Verificar la conexión a internet
+    // Cargar partidos desde Firebase
     LaunchedEffect(Unit) {
-        isConnected = NetworkUtils.isInternetAvailable(context)
-    }
-
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
-            obtenerUbicacion(context) { location ->
-                userLocation = LatLng(location.latitude, location.longitude)
-                mostrarMapa = true
-                scope.launch {
-                    val canchas = obtenerCanchasCercanas(context, userLocation)
-                    nearbyFields = canchas
+        db.collection("partidos")
+            .get()
+            .addOnSuccessListener { result ->
+                try {
+                    partidos.clear()
+                    partidos.addAll(result.documents.mapNotNull { it.data })
+                    cargando.value = false
+                } catch (e: Exception) {
+                    error.value = "Error al procesar datos: ${e.message}"
+                    cargando.value = false
                 }
             }
-        } else {
-            errorMessage = "Permisos de ubicación denegados"
-        }
-    }
-
-    fun solicitarPermisosYMostrarMapa() {
-        if (!isConnected) {
-            errorMessage = "Sin conexión a internet"
-            return
-        }
-
-        if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            locationPermissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
-        } else {
-            obtenerUbicacion(context) { location ->
-                userLocation = LatLng(location.latitude, location.longitude)
-                mostrarMapa = true
-                scope.launch {
-                    val canchas = obtenerCanchasCercanas(context, userLocation)
-                    nearbyFields = canchas
-                }
+            .addOnFailureListener { exception ->
+                error.value = exception.message
+                cargando.value = false
             }
-        }
     }
 
+    // Diseño de la pantalla
     Box(
         modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Color(0xFFA10202), Color(0xFF351111))
+                )
+            )
+            .padding(16.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Encontrar Partido")
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Partidos Disponibles",
+                fontSize = 24.sp,
+                color = Color.White
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = { solicitarPermisosYMostrarMapa() }) {
-                Text(text = "Encontrar Canchas Cercanas")
-            }
+            if (cargando.value) {
+                CircularProgressIndicator(color = Color.White)
+            } else if (error.value != null) {
+                Text(
+                    text = "Error: ${error.value}",
+                    color = Color.Red,
+                    fontSize = 16.sp
+                )
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(partidos) { partido ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "Nombre: ${partido["nombre"] as? String ?: "Sin nombre"}",
+                                    fontSize = 18.sp,
+                                    color = Color.Black
+                                )
+                                Text(
+                                    text = "Descripción: ${partido["descripcion"] as? String ?: "Sin descripción"}",
+                                    fontSize = 16.sp,
+                                    color = Color.Gray
+                                )
+                                Text(
+                                    text = "Ubicación: ${partido["ubicacion"] as? String ?: "Sin ubicación"}",
+                                    fontSize = 16.sp,
+                                    color = Color.Gray
+                                )
+                                Text(
+                                    text = "Jugadores: ${(partido["jugadores"] as? List<*>)?.size ?: 0} / ${partido["limiteJugadores"] as? Int ?: 0}",
+                                    fontSize = 16.sp,
+                                    color = Color.Gray
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    // Botón para ver ubicación en el mapa
+                                    Button(
+                                        onClick = {
+                                            val ubicacion = partido["ubicacion"] as? String
+                                            if (ubicacion != null) {
+                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ubicacion))
+                                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                                navController.context.startActivity(intent)
+                                            }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA))
+                                    ) {
+                                        Text("Ver Mapa", color = Color.White)
+                                    }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (errorMessage != null) {
-                Text(text = errorMessage ?: "", color = Color.Red)
-            } else if (mostrarMapa && userLocation != null) {
-                GoogleMap(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    properties = MapProperties(
-                        isMyLocationEnabled = true,
-                        mapType = MapType.NORMAL,
-                        mapStyleOptions = mapStyleOptions
-                    )
-                ) {
-                    userLocation?.let { location ->
-                        Marker(
-                            state = MarkerState(position = location),
-                            title = "Tu ubicación",
-                            snippet = "Aquí te encuentras"
-                        )
-                    }
-
-                    nearbyFields.forEach { cancha ->
-                        Marker(
-                            state = MarkerState(position = cancha),
-                            title = "Cancha de fútbol",
-                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)
-                        )
+                                    // Botón para unirse al partido
+                                    Button(
+                                        onClick = {
+                                            if (userId != null) {
+                                                val jugadores = (partido["jugadores"] as? MutableList<String>) ?: mutableListOf()
+                                                if (jugadores.size < (partido["limiteJugadores"] as? Int ?: 0)) {
+                                                    jugadores.add(userId)
+                                                    db.collection("partidos")
+                                                        .document(partido["id"] as String)
+                                                        .update("jugadores", jugadores)
+                                                        .addOnSuccessListener {
+                                                            partidos.remove(partido) // Quitar el partido si el usuario se une
+                                                        }
+                                                        .addOnFailureListener { e ->
+                                                            error.value = "Error al unirse: ${e.message}"
+                                                        }
+                                                } else {
+                                                    error.value = "Partido lleno."
+                                                }
+                                            }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA))
+                                    ) {
+                                        Text("Unirse", color = Color.White)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { navController.navigate("menu") }) {
-            Text(text = "Menú")
-        }
-    }
-}
-
-@SuppressLint("MissingPermission")
-fun obtenerUbicacion(context: Context, onResult: (android.location.Location) -> Unit) {
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-        if (location != null) {
-            onResult(location)
-        }
-    }.addOnFailureListener { exception ->
-        Log.d("MapsDebug", "Error al obtener la ubicación: ${exception.message}")
-    }
-}
-
-// Función suspendida para obtener las canchas cercanas usando Google Places API
-suspend fun obtenerCanchasCercanas(
-    context: Context,
-    userLocation: LatLng?
-): List<LatLng> {
-    if (userLocation == null) return emptyList()
-
-    val apiKey = "TU_CLAVE_API_AQUI"
-    val radius = 5000
-    val type = "stadium"
-
-    val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json" +
-            "?location=${userLocation.latitude},${userLocation.longitude}" +
-            "&radius=$radius&type=$type&key=$apiKey"
-
-    return withContext(Dispatchers.IO) {
-        try {
-            val client = OkHttpClient()
-            val request = Request.Builder().url(url).build()
-            val response = client.newCall(request).execute()
-            val responseData = response.body?.string() ?: return@withContext emptyList()
-
-            val jsonObject = JSONObject(responseData)
-            val results = jsonObject.getJSONArray("results")
-            val canchas = mutableListOf<LatLng>()
-
-            for (i in 0 until results.length()) {
-                val location = results.getJSONObject(i)
-                    .getJSONObject("geometry")
-                    .getJSONObject("location")
-                val lat = location.getDouble("lat")
-                val lng = location.getDouble("lng")
-                canchas.add(LatLng(lat, lng))
+            Button(
+                onClick = { navController.navigate("menu") },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA))
+            ) {
+                Text("Volver al Menú", color = Color.White)
             }
-
-            canchas
-        } catch (e: Exception) {
-            Log.e("NearbySearch", "Error al obtener canchas cercanas: ${e.message}")
-            emptyList()
         }
     }
 }

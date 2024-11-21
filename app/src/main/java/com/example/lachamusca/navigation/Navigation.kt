@@ -24,10 +24,10 @@ fun Navigation(modifier: Modifier = Modifier) {
             LoginScreen(navController)  // Pantalla de login
         }
         composable(route = "findMatch") {
-            EncontrarPartidoScreen(navController, context)  // Pantalla de encontrar partido
+            EncontrarPartidoScreen(navController)  // Pantalla de encontrar partido
         }
         composable(route = "createMatch") {
-            CrearPartidoScreen(navController = navController, context)  // Pantalla de crear partido
+            CrearPartidoScreen(navController = navController)  // Pantalla de crear partido
         }
         composable("popularMatches") {
             PartidosPopularesScreen(navController)  // Pantalla de partidos populares

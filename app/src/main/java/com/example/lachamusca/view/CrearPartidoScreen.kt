@@ -1,222 +1,164 @@
 package com.example.lachamusca.view
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.google.firebase.firestore.FirebaseFirestore
-import java.text.SimpleDateFormat
-import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CrearPartidoScreen(navController: NavController, context: Context) {
-    var canchaName by remember { mutableStateOf(TextFieldValue("")) }
-    var cantidadParticipantes by remember { mutableStateOf(TextFieldValue("")) }
-    var ubicacion by remember { mutableStateOf(TextFieldValue("")) }
-    var duracion by remember { mutableStateOf(1.0) }
-    var horariosDisponibles by remember { mutableStateOf(listOf<String>()) }
-    var horarioSeleccionado by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
+fun CrearPartidoScreen(navController: NavHostController) {
+    var nombrePartido by remember { mutableStateOf("") }
+    var descripcion by remember { mutableStateOf("") }
+    var linkUbicacion by remember { mutableStateOf("") }
+    var limiteJugadores by remember { mutableStateOf(10) }
+    var mensaje by remember { mutableStateOf("") }
 
-    // Actualizar la lista de horarios cuando la duración cambia
-    LaunchedEffect(duracion) {
-        horariosDisponibles = generarHorariosDisponibles(duracion)
-    }
+    // Instancia de Firebase Firestore
+    val db = FirebaseFirestore.getInstance()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush = Brush.verticalGradient(colors = listOf(Color(0xFFA10202), Color(0xFF351111))))
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Color(0xFFA10202), Color(0xFF351111))
+                )
+            )
+            .padding(16.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
+            // Título
             Text(
                 text = "Crear Partido",
-                style = TextStyle(color = Color.White, fontSize = 25.sp, fontWeight = FontWeight.W400),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Text(
-                text = "Introduzca la Siguiente Información",
-                style = TextStyle(color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.W400)
+                fontSize = 24.sp,
+                color = Color.White
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = canchaName,
-                onValueChange = { canchaName = it },
-                label = { Text("NOMBRE DE LA CANCHA") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White, shape = RoundedCornerShape(8.dp))
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = cantidadParticipantes,
-                onValueChange = { cantidadParticipantes = it },
-                label = { Text("CANTIDAD DE PARTICIPANTES") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White, shape = RoundedCornerShape(8.dp))
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = ubicacion,
-                onValueChange = { ubicacion = it },
-                label = { Text("UBICACIÓN") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White, shape = RoundedCornerShape(8.dp))
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
+            // Campo para el nombre del partido
+            TextField(
+                value = nombrePartido,
+                onValueChange = { nombrePartido = it },
+                label = { Text("Nombre del Partido") },
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = { duracion = 1.0 },
-                    colors = ButtonDefaults.buttonColors(containerColor = if (duracion == 1.0) Color(0xFF009951) else Color.Gray)
-                ) {
-                    Text(text = "1 Hora")
-                }
+                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+            )
 
-                Button(
-                    onClick = { duracion = 1.5 },
-                    colors = ButtonDefaults.buttonColors(containerColor = if (duracion == 1.5) Color(0xFF009951) else Color.Gray)
-                ) {
-                    Text(text = "1.5 Horas")
-                }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Campo para la descripción
+            TextField(
+                value = descripcion,
+                onValueChange = { descripcion = it },
+                label = { Text("Descripción") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Campo para la ubicación
+            TextField(
+                value = linkUbicacion,
+                onValueChange = { linkUbicacion = it },
+                label = { Text("Ubicación (Google Maps Link)") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Campo para el límite de jugadores
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Límite de Jugadores:",
+                    color = Color.White,
+                    modifier = Modifier.weight(1f)
+                )
+                TextField(
+                    value = limiteJugadores.toString(),
+                    onValueChange = { limiteJugadores = it.toIntOrNull() ?: limiteJugadores },
+                    label = { Text("Máximo") },
+                    modifier = Modifier.weight(1f),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Dropdown para seleccionar horario
-            OutlinedTextField(
-                value = horarioSeleccionado,
-                onValueChange = { },
-                readOnly = true,
-                label = { Text("Horario", color = Color.White) },
-                trailingIcon = {
-                    Icon(
-                        Icons.Default.ArrowDropDown,
-                        contentDescription = null,
-                        modifier = Modifier.clickable { expanded = true }
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF6200EE), shape = RoundedCornerShape(8.dp)) // Fondo morado
-                    .clickable { expanded = true }
-            )
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                horariosDisponibles.forEach { horario ->
-                    DropdownMenuItem(
-                        text = { Text(horario) },
-                        onClick = {
-                            horarioSeleccionado = horario
-                            expanded = false
-                        }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
+            // Botón para guardar partido
             Button(
                 onClick = {
-                    guardarPartidoEnFirebase(
-                        canchaName.text,
-                        ubicacion.text,
-                        horarioSeleccionado,
-                        context
-                    )
+                    if (nombrePartido.isNotEmpty() && descripcion.isNotEmpty() && linkUbicacion.isNotEmpty()) {
+                        val partido = mapOf(
+                            "nombre" to nombrePartido,
+                            "descripcion" to descripcion,
+                            "ubicacion" to linkUbicacion,
+                            "limiteJugadores" to limiteJugadores,
+                            "jugadores" to listOf<String>()
+                        )
+                        db.collection("partidos")
+                            .add(partido)
+                            .addOnSuccessListener {
+                                mensaje = "Partido creado exitosamente."
+                                nombrePartido = ""
+                                descripcion = ""
+                                linkUbicacion = ""
+                                limiteJugadores = 10
+                            }
+                            .addOnFailureListener { e ->
+                                mensaje = "Error al crear partido: ${e.message}"
+                            }
+                    } else {
+                        mensaje = "Por favor, completa todos los campos."
+                    }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF009951)),
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA))
             ) {
-                Text(text = "CREAR PARTIDO", color = Color.White)
+                Text("Guardar Partido", color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Botón para volver al menú
             Button(
                 onClick = { navController.navigate("menu") },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EA))
             ) {
-                Text(text = "Menu")
+                Text("Volver al Menú", color = Color.White)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Mostrar mensaje de éxito o error
+            if (mensaje.isNotEmpty()) {
+                Text(text = mensaje, color = Color.Yellow, fontSize = 16.sp)
             }
         }
     }
-}
-
-// Función para generar horarios disponibles
-fun generarHorariosDisponibles(duracion: Double): List<String> {
-    val horarios = mutableListOf<String>()
-    val formatoHora = SimpleDateFormat("HH:mm", Locale.getDefault())
-    val calendario = Calendar.getInstance()
-
-    calendario.set(Calendar.HOUR_OF_DAY, 8)
-    calendario.set(Calendar.MINUTE, 0)
-
-    while (calendario.get(Calendar.HOUR_OF_DAY) < 22) {
-        val inicio = formatoHora.format(calendario.time)
-        calendario.add(Calendar.MINUTE, (duracion * 60).toInt())
-        val fin = formatoHora.format(calendario.time)
-        horarios.add("$inicio - $fin")
-    }
-    return horarios
-}
-
-// Función para guardar el partido en Firestore
-fun guardarPartidoEnFirebase(canchaName: String, ubicacion: String, horarioSeleccionado: String, context: Context) {
-    val db = FirebaseFirestore.getInstance()
-    val partido = hashMapOf(
-        "canchaName" to canchaName,
-        "ubicacion" to ubicacion,
-        "horario" to horarioSeleccionado
-    )
-
-    db.collection("partidos")
-        .add(partido)
-        .addOnSuccessListener {
-            Toast.makeText(context, "Partido creado exitosamente", Toast.LENGTH_SHORT).show()
-        }
-        .addOnFailureListener { e ->
-            Toast.makeText(context, "Error al crear el partido: ${e.message}", Toast.LENGTH_SHORT).show()
-
-
-        }
 }
