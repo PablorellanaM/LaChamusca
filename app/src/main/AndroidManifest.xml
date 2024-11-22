@@ -2,43 +2,51 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permisos para acceder a Internet y al almacenamiento externo -->
+    <!-- Permisos requeridos por la aplicación -->
+
+    <!-- Permiso para acceder a Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Permiso para leer datos del almacenamiento externo -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-    <!-- Permisos para acceder a la ubicación precisa y aproximada -->
+    <!-- Permisos para acceder a la ubicación del dispositivo -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!-- Permiso para verificar el estado de la red -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- Configuración de la aplicación -->
     <application
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.LaChamusca"
-        tools:targetApi="31">
+        android:allowBackup="true"  <!-- Habilitar respaldo de datos -->
+    android:dataExtractionRules="@xml/data_extraction_rules"  <!-- Reglas para extracción de datos -->
+    android:fullBackupContent="@xml/backup_rules"  <!-- Reglas para el respaldo completo -->
+    android:icon="@mipmap/ic_launcher"  <!-- Icono de la aplicación -->
+    android:label="@string/app_name"  <!-- Nombre de la aplicación -->
+    android:roundIcon="@mipmap/ic_launcher_round"  <!-- Icono redondo -->
+    android:supportsRtl="true"  <!-- Soporte para idiomas de derecha a izquierda -->
+    android:theme="@style/Theme.LaChamusca"  <!-- Tema principal de la aplicación -->
+    tools:targetApi="31">  <!-- Versión objetivo de la API -->
 
-        <!-- Configuración de Places API -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCXh7GAt6nmL0_TuPgIaESUeqnwduW9WGE"/>
+    <!-- Configuración para Google Places API -->
+    <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="AIzaSyCXh7GAt6nmL0_TuPgIaESUeqnwduW9WGE"/> <!-- Clave de la API -->
 
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.LaChamusca">
+    <!-- Declaración de la actividad principal -->
+    <activity
+        android:name=".MainActivity"  <!-- Nombre de la actividad -->
+    android:exported="true"  <!-- Indica que la actividad es accesible externamente -->
+    android:label="@string/app_name"  <!-- Etiqueta de la actividad -->
+    android:theme="@style/Theme.LaChamusca">  <!-- Tema asignado a la actividad -->
 
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+    <!-- Filtro de intención para lanzar la actividad principal -->
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />  <!-- Marca esta actividad como el punto de inicio -->
+        <category android:name="android.intent.category.LAUNCHER" />  <!-- Hace que la actividad sea visible en el lanzador -->
+    </intent-filter>
+</activity>
     </application>
 
-</manifest>
+    </manifest>
